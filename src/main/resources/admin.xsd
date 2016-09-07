@@ -1,0 +1,58 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:admin="http://model.admin.glytoucan.org/" targetNamespace="http://model.admin.glytoucan.org/"
+	elementFormDefault="qualified">
+
+	<xs:complexType name="responseMessage">
+		<xs:sequence>
+			<xs:element name="request" type="xs:string" />
+			<xs:element name="message" type="xs:string" />
+			<xs:element name="errorCode" type="xs:string" />
+			<xs:element name="time" type="xs:string" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="authentication">
+		<xs:sequence>
+			<xs:element name="id" type="xs:string" />
+			<xs:element name="apiKey" type="xs:string" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:element name="userKeyRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="authentication" type="admin:authentication" />
+				<xs:element name="email" type="xs:string" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	
+	<xs:element name="userKeyResponse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="email" type="xs:string" />
+				<xs:element name="key" type="xs:string" />
+				<xs:element name="responseMessage" type="admin:responseMessage" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="userRegisterRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="authentication" type="admin:authentication" />
+				<xs:element name="firstName" type="xs:string" />
+				<xs:element name="lastName" type="xs:string" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="userRegisterResponse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="givenName" type="xs:string" />
+				<xs:element name="responseMessage" type="admin:responseMessage" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

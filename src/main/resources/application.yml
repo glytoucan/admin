@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: api.glytoucan.org
+  triplestore:
+    driverClassName: virtuoso.jdbc4.Driver
+    url: jdbc:virtuoso://test.user.ts.glytoucan.org:1111
+    username: dba
+  mail:
+    host: test.glytoucan.org
+    port: 25
+server:
+  port: 80
+mail:
+  address:
+    from: support@glytoucan.org
+    admin: admin@glytoucan.org
+  subject:
+    newRegistration: Your registration to the Glycan Repository, GlyTouCan
+    notifyRegistration: NEW registration:>
+  body:
+    newRegistration: newRegistration.vm
+    notifyRegistration: notifyRegistration.vm
+logging:
+  file: api.log
+  path: /tmp/glytoucan/
