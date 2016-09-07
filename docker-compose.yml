@@ -23,4 +23,6 @@ services:
      - SPRING_TRIPLESTORE_PASSWORD
      - SPRING_TRIPLESTORE_URL
      - MAVEN_OPTS=-da:org.openrdf...
+     - GOOGLE_OAUTH2_CLIENTID
+     - GOOGLE_OAUTH2_CLIENTSECRET
     restart: always

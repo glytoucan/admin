@@ -1,0 +1,7 @@
+bin
+.classpath
+.project
+.settings
+target
+pom.xml.versionsBackup
+api.log

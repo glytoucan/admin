@@ -36,3 +36,5 @@ mail:
 
 msDb:
   rdf: http://www.monosaccharidedb.org/rdf/monosaccharide.action?name=
+google.oauth2.clientId: 144546288829-o7vr36n5s7it71pi6tandfmsqteq38p3.apps.googleusercontent.com
+google.oauth2.clientSecret: Lpd2gIA6fRMgYuH3dhmrTx-O
