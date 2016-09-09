@@ -33,6 +33,7 @@ import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResour
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
@@ -67,6 +68,7 @@ public class AuthService {
    * @return
    * @throws UserException
    */
+  @Transactional
   public boolean authenticate(Authentication auth) throws UserException {
     
     System.out.println("user:>" + auth.getId());

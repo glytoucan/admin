@@ -29,9 +29,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+//import org.springframework.boot.test.context.SpringBootTest;
+//import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+//import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 
@@ -41,6 +44,9 @@ import org.springframework.transaction.annotation.Transactional;
 @ComponentScan(basePackages = { "org.glycoinfo.rdf.scint" })
 @Configuration
 @EnableAutoConfiguration
+//@RunWith(SpringRunner.class)
+//@SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT, classes = { UserProcedureRdfTest.class, VirtSesameTransactionConfig.class,
+//    UserProcedureConfig.class })
 public class UserProcedureRdfTest {
 
   private static final Log logger = LogFactory.getLog(UserProcedureRdfTest.class);
@@ -71,6 +77,7 @@ public class UserProcedureRdfTest {
   SelectScint selectScintPerson;
 
   @Test
+  @Transactional
   public void testDeleteProgramMembership() throws SparqlException {
 
     SparqlEntity sparqlEntityPerson = new SparqlEntity("TestID123");
@@ -112,6 +119,7 @@ public class UserProcedureRdfTest {
   }
 
   @Test
+  @Transactional
   public void testUser() throws SparqlException, UserException {
     SparqlEntity se = new SparqlEntity();
     // se.setValue(SelectSparql.PRIMARY_KEY, "person789@person.com");
@@ -119,7 +127,7 @@ public class UserProcedureRdfTest {
     se.setValue("givenName", "person");
     se.setValue("familyName", "789");
     se.setValue("verifiedEmail", "true");
-    se.setValue(Contributor.ID, "789");
+    se.setValue(UserProcedure.CONTRIBUTOR_ID, "789");
     userProcedure.add(se);
 
     se.remove(SelectSparql.PRIMARY_KEY);
@@ -141,13 +149,14 @@ public class UserProcedureRdfTest {
   }
 
   @Test
+  @Transactional
   public void testUserNotVerified() throws SparqlException, UserException {
     SparqlEntity se = new SparqlEntity();
     se.setValue("email", "person456@person.com");
     se.setValue("givenName", "person");
     se.setValue("familyName", "456");
     se.setValue("verifiedEmail", "false");
-    se.setValue(Contributor.ID, "456");
+    se.setValue(UserProcedure.CONTRIBUTOR_ID, "456");
     userProcedure.add(se);
     se.setValue("member", null);
     se.remove("verifiedEmail");
@@ -175,12 +184,14 @@ public class UserProcedureRdfTest {
   // }
 
   @Test(expected = UserException.class)
+  @Transactional
   public void testJoinBadMembership() throws SparqlException, UserException {
     String results = userProcedure.generateHash("person123@test.com");
     Assert.assertNotNull(results);
   }
 
   @Test
+  @Transactional
   public void testJoinMembership() throws SparqlException, UserException {
     SparqlEntity se = new SparqlEntity();
     // se.setValue(SelectSparql.PRIMARY_KEY, "person789");
@@ -188,7 +199,7 @@ public class UserProcedureRdfTest {
     se.setValue(UserProcedure.GIVEN_NAME, "testperson789given");
     se.setValue(UserProcedure.FAMILY_NAME, "testperson789family");
     se.setValue(UserProcedure.VERIFIED_EMAIL, "true");
-    se.setValue(Contributor.ID, "789");
+    se.setValue(UserProcedure.CONTRIBUTOR_ID, "789");
     userProcedure.add(se);
 
     // String results = userProcedure.generateHash("person789");
@@ -202,6 +213,7 @@ public class UserProcedureRdfTest {
   }
 
   @Test
+  @Transactional
   public void testJoinMembershipTwice() throws SparqlException, UserException {
     SparqlEntity se = new SparqlEntity();
     // se.setValue(SelectSparql.PRIMARY_KEY, "person789");
@@ -209,7 +221,7 @@ public class UserProcedureRdfTest {
     se.setValue(UserProcedure.GIVEN_NAME, "testperson789given");
     se.setValue(UserProcedure.FAMILY_NAME, "testperson789family");
     se.setValue(UserProcedure.VERIFIED_EMAIL, "true");
-    se.setValue(Contributor.ID, "789");
+    se.setValue(UserProcedure.CONTRIBUTOR_ID, "789");
     userProcedure.add(se);
 
     String results = userProcedure.generateHash(se.getValue(UserProcedure.EMAIL));
@@ -235,6 +247,7 @@ public class UserProcedureRdfTest {
   }
 
   @Test
+  @Transactional
   public void testCheck() throws SparqlException, UserException {
     SparqlEntity se = new SparqlEntity();
     // se.setValue(SelectSparql.PRIMARY_KEY, "person789");
@@ -242,7 +255,7 @@ public class UserProcedureRdfTest {
     se.setValue(UserProcedure.GIVEN_NAME, "testperson789given");
     se.setValue(UserProcedure.FAMILY_NAME, "testperson789family");
     se.setValue(UserProcedure.VERIFIED_EMAIL, "true");
-    se.setValue(Contributor.ID, "789");
+    se.setValue(UserProcedure.CONTRIBUTOR_ID, "789");
     userProcedure.add(se);
 
     String hash = userProcedure.generateHash(se.getValue(UserProcedure.EMAIL));
@@ -253,6 +266,7 @@ public class UserProcedureRdfTest {
   }
 
   @Test
+  @Transactional
   public void testConversionToEmail() throws SparqlException, UserException {
     
     // retrieve all persons emails
@@ -281,6 +295,7 @@ public class UserProcedureRdfTest {
   }
   
   @Test
+  @Transactional
   public void testGetKey() throws SparqlException, UserException {
     
     UserKeyRequest req = new UserKeyRequest();

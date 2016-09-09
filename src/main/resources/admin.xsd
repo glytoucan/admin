@@ -70,7 +70,7 @@
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element name="authentication" type="admin:authentication" />
-				<xs:element name="primaryId" type="xs:string" />
+				<xs:element name="contributorId" type="xs:string" />
 				<xs:element name="apiKey" type="xs:string" />
 			</xs:sequence>
 		</xs:complexType>

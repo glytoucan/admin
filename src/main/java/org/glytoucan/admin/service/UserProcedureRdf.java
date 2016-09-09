@@ -121,6 +121,7 @@ public class UserProcedureRdf implements UserProcedure {
   }
 
 //  @Override
+  @Transactional
   public void add(SparqlEntity userSparqlEntity) throws UserException {
     Set<String> columns = userSparqlEntity.getColumns();
     if (!columns.containsAll(Arrays.asList(requiredFields))) {
@@ -182,7 +183,7 @@ public class UserProcedureRdf implements UserProcedure {
       throw new UserException("given name cannot be blank.  Please fix account information or login with google+.");
 
     // find external contributor id
-    String contributorId = null;
+    String contributorId = userSparqlEntity.getValue(UserProcedure.CONTRIBUTOR_ID);
 
     // try {
     // contributorId =
@@ -250,6 +251,7 @@ public class UserProcedureRdf implements UserProcedure {
     }
   }
 
+  @Transactional
   public String generateHash(String id) throws UserException {
     // SparqlEntity userSE = getUser(email);
     // String userid = userSE.getValue(ID);
@@ -322,6 +324,7 @@ public class UserProcedureRdf implements UserProcedure {
   }
 
   
+  @Transactional
   public SparqlEntity getById(String primaryId) throws UserException {
     try {
 
@@ -392,6 +395,7 @@ public class UserProcedureRdf implements UserProcedure {
   // return emailSE.getValue(CONTRIBUTOR_ID);
   // }
 
+  @Transactional
   public String getIdByEmail(String email) throws UserException {
     try {
       SparqlEntity emailSE = new SparqlEntity();
@@ -415,6 +419,7 @@ public class UserProcedureRdf implements UserProcedure {
 
   }
 
+  @Transactional
   public List<SparqlEntity> getAll() throws UserException {
     try {
       return sparqlDAO.query(selectScintPerson.getSparqlBean());
@@ -424,6 +429,7 @@ public class UserProcedureRdf implements UserProcedure {
   }
 
 
+  @Transactional
   public List<SparqlEntity> getByContributorId(String username) throws UserException {
     try {
       SparqlEntity sparqlEntityPerson = new SparqlEntity();
@@ -440,6 +446,7 @@ public class UserProcedureRdf implements UserProcedure {
 
   }
 
+  @Transactional
   public boolean checkApiKey(String username, String hash) throws UserException {
     try {
       if (StringUtils.isBlank(username) || StringUtils.isBlank(hash)) {
@@ -492,7 +499,7 @@ public class UserProcedureRdf implements UserProcedure {
    * 
    * @see org.glytoucan.admin.service.UserProcedure#getKey(org.glytoucan.client.soap.UserKeyRequest)
    */
-
+  @Transactional
   public UserKeyResponse getKey(UserKeyRequest req) throws UserException {
     String email = req.getPrimaryId();
     String primaryKey = NumberGenerator.generateHash(email, new Date(0));
@@ -524,6 +531,7 @@ public class UserProcedureRdf implements UserProcedure {
   }
 
   @Override
+  @Transactional
   public UserDetailsResponse getDetails(UserDetailsRequest req) throws UserException {
     String id = req.getPrimaryId();
     String primaryKey = NumberGenerator.generateHash(id, new Date(0));

@@ -35,10 +35,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
+//import org.springframework.boot.test.context.SpringBootTest;
+//import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
+//import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.client.HttpClientErrorException;
@@ -53,9 +59,17 @@ import org.springframework.ws.client.core.WebServiceTemplate;
  *         http://creativecommons.org/licenses/by/4.0/.
  *
  */
+////@RunWith(SpringRunner.class)
+////@SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT)
+//@SpringApplicationConfiguration(classes = Application.class)
+//@WebIntegrationTest(randomPort = true)
+////@IntegrationTest("server.port:0")
+//@EnableAutoConfiguration
+
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = Application.class)
-@WebIntegrationTest(randomPort = true)
+@SpringApplicationConfiguration(Application.class)
+@WebAppConfiguration
+@IntegrationTest("server.port=0")
 public class UserEndpointTest {
 	
 	private static final Log logger = LogFactory.getLog(UserEndpointTest.class);
@@ -81,6 +95,7 @@ public class UserEndpointTest {
   String apiKey = "JDUkMjAxNjA5MDUwOTM5MjMkVWZzaHNyRVFkMVl4Umx0MjJiczVyZFZVNDQ5bUJBVTBoQTdaeGpiUkRpMw==";
 
 	@Test
+	@Transactional
 	public void testInvalidAuth() {
 		UserKeyRequest request = new UserKeyRequest();
 		Authentication auth = new Authentication();
@@ -190,6 +205,7 @@ public class UserEndpointTest {
      Assert.assertEquals("1",result.getUser().getExternalId());
      Assert.assertEquals("Toucan",result.getUser().getFamilyName());
    }
+
    @Test
    @Transactional
    public void testUserKeyCheckRequest() {
@@ -198,13 +214,13 @@ public class UserEndpointTest {
      auth.setId("1");
      auth.setApiKey(apiKey);
      request.setAuthentication(auth);
-     request.setPrimaryId("glytoucan@gmail.com");
+     request.setContributorId("1");
      request.setApiKey(apiKey);
      marshaller.setPackagesToScan(ClassUtils.getPackageName(UserKeyCheckRequest.class));
 
-//     Object wsResult = new WebServiceTemplate(marshaller).marshalSendAndReceive("http://localhost:"
-//         + port + "/ws", request);
-     Object wsResult = new WebServiceTemplate(marshaller).marshalSendAndReceive("http://localhost:8031/ws", request);
+     Object wsResult = new WebServiceTemplate(marshaller).marshalSendAndReceive("http://localhost:"
+         + port + "/ws", request);
+//     Object wsResult = new WebServiceTemplate(marshaller).marshalSendAndReceive("http://localhost:8031/ws", request);
      assertNotNull(wsResult);
      UserKeyCheckResponse result = (UserKeyCheckResponse)wsResult;
      assertNotNull(result);
@@ -214,7 +230,6 @@ public class UserEndpointTest {
      Assert.assertEquals("0",result.getResponseMessage().getErrorCode());
      Assert.assertTrue(result.isResult());
    }
-
    
    @Test
    @Transactional
@@ -224,7 +239,7 @@ public class UserEndpointTest {
      auth.setId("1");
      auth.setApiKey(apiKey);
      request.setAuthentication(auth);
-     request.setPrimaryId("glytoucan@gmail.com");
+     request.setContributorId("1");
      request.setApiKey(apiKey);
      marshaller.setPackagesToScan(ClassUtils.getPackageName(UserKeyCheckRequest.class));
 

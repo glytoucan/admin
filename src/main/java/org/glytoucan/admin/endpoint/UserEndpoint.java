@@ -29,6 +29,7 @@ import org.glytoucan.admin.model.UserKeyResponse;
 import org.glytoucan.admin.service.AuthService;
 import org.glytoucan.admin.service.UserProcedure;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
@@ -72,6 +73,7 @@ public class UserEndpoint {
    */
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "userKeyRequest")
   @ResponsePayload
+  @Transactional
   public UserKeyResponse getKey(@RequestPayload UserKeyRequest request) {
     Assert.notNull(request);
     Assert.notNull(request.getAuthentication());
@@ -127,6 +129,7 @@ public class UserEndpoint {
    */
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "userDetailsRequest")
   @ResponsePayload
+  @Transactional
   public UserDetailsResponse userDetailsRequest(@RequestPayload UserDetailsRequest request) {
     Assert.notNull(request);
     Assert.notNull(request.getAuthentication());
@@ -171,19 +174,20 @@ public class UserEndpoint {
  
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "userKeyCheckRequest")
   @ResponsePayload
+  @Transactional
   public UserKeyCheckResponse userKeyCheckRequest(@RequestPayload UserKeyCheckRequest request) {
     Assert.notNull(request);
     Assert.notNull(request.getAuthentication());
     Assert.notNull(request.getAuthentication().getId());
     Assert.notNull(request.getAuthentication().getApiKey());
-    Assert.notNull(request.getPrimaryId());
+    Assert.notNull(request.getContributorId());
     Assert.notNull(request.getApiKey());
 
     ResponseMessage rm = new org.glytoucan.admin.model.ResponseMessage();
     rm.setTime((new Date()).toString());
     UserKeyCheckResponse res = new UserKeyCheckResponse();
 
-    UserDetailsResponse userRes = new UserDetailsResponse();
+//    UserDetailsResponse userRes = new UserDetailsResponse();
     
     try {
       if (!authService.authenticate(request.getAuthentication())) {
@@ -198,36 +202,35 @@ public class UserEndpoint {
       res.setResponseMessage(rm);
       return res;
     }
-    UserDetailsRequest userRequest = new UserDetailsRequest();
+//    UserDetailsRequest userRequest = new UserDetailsRequest();
     
-    userRequest.setPrimaryId(request.getPrimaryId());
+//    userRequest.setPrimaryId(request.getPrimaryId());
     
-    SparqlEntity se = null;
+//    SparqlEntity se = null;
+//    try {
+//      userRes = userProcedure.getDetails(userRequest);
+//    } catch (UserException e) {
+//      // invalid data in se, return with errorcode.
+//      rm.setMessage("Invalid Accession Number");
+//      rm.setErrorCode("-100");
+//      rm.setTime((new Date()).toString());
+//      res.setResponseMessage(rm);
+//      return res;
+//    }
+//    
+//    User user = userRes.getUser();
+//    
+//    if (null == user) {
+//      // invalid data in se, return with errorcode.
+//      rm.setMessage("User " + request.getPrimaryId() + " does not exist");
+//      rm.setErrorCode("-50");
+//      rm.setTime((new Date()).toString());
+//      res.setResponseMessage(rm);
+//      return res;
+//     }
+    
     try {
-      userRes = userProcedure.getDetails(userRequest);
-    } catch (UserException e) {
-      // invalid data in se, return with errorcode.
-      rm.setMessage("Invalid Accession Number");
-      rm.setErrorCode("-100");
-      rm.setTime((new Date()).toString());
-      res.setResponseMessage(rm);
-      return res;
-    }
-    
-    User user = userRes.getUser();
-    
-    if (null == user) {
-      // invalid data in se, return with errorcode.
-      rm.setMessage("User " + request.getPrimaryId() + " does not exist");
-      rm.setErrorCode("-50");
-      rm.setTime((new Date()).toString());
-      res.setResponseMessage(rm);
-      return res;
-     }
-    
-    se = null;
-    try {
-      boolean result = userProcedure.checkApiKey(user.getExternalId(), request.getApiKey());
+      boolean result = userProcedure.checkApiKey(request.getContributorId(), request.getApiKey());
       res.setResult(result);
     } catch (UserException e) {
       // invalid data in se, return with errorcode.
@@ -238,13 +241,16 @@ public class UserEndpoint {
       return res;
     }
 
-    rm.setMessage("query result for:>" + request.getPrimaryId());
+    rm.setMessage("query result for:>" + request.getContributorId());
     rm.setErrorCode("0");
 
     res.setResponseMessage(rm);
     return res;
   }
-
+  
+  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "userGenerateKeyRequest")
+  @ResponsePayload
+  @Transactional
   public UserGenerateKeyResponse generateKey(UserGenerateKeyRequest request) {
     Assert.notNull(request);
     Assert.notNull(request.getAuthentication());
