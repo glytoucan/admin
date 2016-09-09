@@ -284,19 +284,19 @@ public class UserProcedureRdfTest {
   public void testGetKey() throws SparqlException, UserException {
     
     UserKeyRequest req = new UserKeyRequest();
-    req.setEmail("aokinobu@gmail.com");
+    req.setPrimaryId("aokinobu@gmail.com");
     UserKeyResponse hash = userProcedure.getKey(req);
     logger.debug(hash);
     logger.debug(hash.getKey());
     Assert.assertNotNull(hash.getKey());
-    Assert.assertEquals(hash.getEmail(), "aokinobu@gmail.com");
+    Assert.assertEquals(hash.getPrimaryId(), "aokinobu@gmail.com");
 
-    req.setEmail("glytoucan@gmail.com");
+    req.setPrimaryId("glytoucan@gmail.com");
     hash = userProcedure.getKey(req);
     logger.debug(hash);
     logger.debug(hash.getKey());
     Assert.assertNotNull(hash.getKey());
-    Assert.assertEquals(hash.getEmail(), "glytoucan@gmail.com");
+    Assert.assertEquals(hash.getPrimaryId(), "glytoucan@gmail.com");
 
     
   }

@@ -18,20 +18,68 @@
 		</xs:sequence>
 	</xs:complexType>
 	
+	<xs:complexType name="user">
+		<xs:sequence>
+			<xs:element name="primaryId" type="xs:string" />
+			<xs:element name="givenName" type="xs:string" />
+			<xs:element name="familyName" type="xs:string" />
+			<xs:element name="email" type="xs:string" />
+			<xs:element name="emailVerified" type="xs:string" />
+			<xs:element name="externalId" type="xs:string" />
+		</xs:sequence>
+	</xs:complexType>
+
 	<xs:element name="userKeyRequest">
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element name="authentication" type="admin:authentication" />
-				<xs:element name="email" type="xs:string" />
+				<xs:element name="primaryId" type="xs:string" />
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
-	
+
 	<xs:element name="userKeyResponse">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element name="email" type="xs:string" />
+				<xs:element name="primaryId" type="xs:string" />
 				<xs:element name="key" type="xs:string" />
+				<xs:element name="responseMessage" type="admin:responseMessage" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="userDetailsRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="authentication" type="admin:authentication" />
+				<xs:element name="primaryId" type="xs:string" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="userDetailsResponse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="user" type="admin:user" />
+				<xs:element name="responseMessage" type="admin:responseMessage" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="userKeyCheckRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="authentication" type="admin:authentication" />
+				<xs:element name="primaryId" type="xs:string" />
+				<xs:element name="apiKey" type="xs:string" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="userKeyCheckResponse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="result" type="xs:boolean" />
 				<xs:element name="responseMessage" type="admin:responseMessage" />
 			</xs:sequence>
 		</xs:complexType>
@@ -41,8 +89,7 @@
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element name="authentication" type="admin:authentication" />
-				<xs:element name="firstName" type="xs:string" />
-				<xs:element name="lastName" type="xs:string" />
+				<xs:element name="user" type="admin:user" />
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -50,9 +97,29 @@
 	<xs:element name="userRegisterResponse">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element name="givenName" type="xs:string" />
+				<xs:element name="user" type="admin:user" />
 				<xs:element name="responseMessage" type="admin:responseMessage" />
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
+	
+	<xs:element name="userGenerateKeyRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="authentication" type="admin:authentication" />
+				<xs:element name="primaryId" type="xs:string" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="userGenerateKeyResponse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="primaryId" type="xs:string" />
+				<xs:element name="key" type="xs:string" />
+				<xs:element name="responseMessage" type="admin:responseMessage" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
 </xs:schema>

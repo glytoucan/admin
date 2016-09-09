@@ -3,7 +3,7 @@ spring:
     name: api.glytoucan.org
   triplestore:
     driverClassName: virtuoso.jdbc4.Driver
-    url: jdbc:virtuoso://test.user.ts.glytoucan.org:1111
+    url: jdbc:virtuoso://cell.cluster.glycoinfo.org:2222
     username: dba
   mail:
     host: test.glytoucan.org

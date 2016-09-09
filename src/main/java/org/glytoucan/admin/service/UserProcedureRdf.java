@@ -24,6 +24,9 @@ import org.glycoinfo.rdf.service.exception.ContributorException;
 import org.glycoinfo.rdf.service.impl.MailService;
 import org.glycoinfo.rdf.utils.NumberGenerator;
 import org.glytoucan.admin.exception.UserException;
+import org.glytoucan.admin.model.User;
+import org.glytoucan.admin.model.UserDetailsRequest;
+import org.glytoucan.admin.model.UserDetailsResponse;
 import org.glytoucan.admin.model.UserKeyRequest;
 import org.glytoucan.admin.model.UserKeyResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -491,7 +494,7 @@ public class UserProcedureRdf implements UserProcedure {
    */
 
   public UserKeyResponse getKey(UserKeyRequest req) throws UserException {
-    String email = req.getEmail();
+    String email = req.getPrimaryId();
     String primaryKey = NumberGenerator.generateHash(email, new Date(0));
     SparqlEntity sparqlEntityPerson = new SparqlEntity(primaryKey);
     UserKeyResponse ukr = new UserKeyResponse();
@@ -504,7 +507,7 @@ public class UserProcedureRdf implements UserProcedure {
       pmSE.setValue(Scintillate.NO_DOMAINS, true);
       selectScintProgramMembership.update(pmSE);
 
-      ukr.setEmail(email);
+      ukr.setPrimaryId(email);
 
       List<SparqlEntity> resultsPM = sparqlDAO.query(selectScintProgramMembership.getSparqlBean());
       if (resultsPM.iterator().hasNext()) {
@@ -518,5 +521,38 @@ public class UserProcedureRdf implements UserProcedure {
     }
 
     return ukr;
+  }
+
+  @Override
+  public UserDetailsResponse getDetails(UserDetailsRequest req) throws UserException {
+    String id = req.getPrimaryId();
+    String primaryKey = NumberGenerator.generateHash(id, new Date(0));
+    SparqlEntity sparqlEntityPerson = new SparqlEntity(primaryKey);
+    UserDetailsResponse res = new UserDetailsResponse();
+    try {
+//      sparqlEntityPerson.setValue(Scintillate.NO_DOMAINS, true);
+      selectScintPerson.update(sparqlEntityPerson);
+
+      List<SparqlEntity> sRes = sparqlDAO.query(selectScintPerson.getSparqlBean());
+      User user = new User();
+      if (sRes.iterator().hasNext()) {
+        SparqlEntity sResultsSE = sRes.iterator().next();
+
+        user.setEmail(sResultsSE.getValue(EMAIL));
+//        verified or not is determined by member or contributor
+//        user.setEmailVerified(sResultsSE.getValue(VERIFIED_EMAIL)); 
+        user.setExternalId(sResultsSE.getValue(CONTRIBUTOR_ID));
+        user.setFamilyName(sResultsSE.getValue(FAMILY_NAME));
+        user.setGivenName(sResultsSE.getValue(GIVEN_NAME));
+        user.setPrimaryId(sResultsSE.getValue(ID));
+      }
+      
+      res.setUser(user);
+
+    } catch (SparqlException e) {
+      throw new UserException(e);
+    }
+    
+    return res;
   }
 }

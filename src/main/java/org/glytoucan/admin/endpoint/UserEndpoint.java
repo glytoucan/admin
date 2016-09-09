@@ -17,6 +17,13 @@ import org.glycoinfo.rdf.service.GlycanProcedure;
 import org.glycoinfo.rdf.service.exception.InvalidException;
 import org.glytoucan.admin.exception.UserException;
 import org.glytoucan.admin.model.ResponseMessage;
+import org.glytoucan.admin.model.User;
+import org.glytoucan.admin.model.UserDetailsRequest;
+import org.glytoucan.admin.model.UserDetailsResponse;
+import org.glytoucan.admin.model.UserGenerateKeyRequest;
+import org.glytoucan.admin.model.UserGenerateKeyResponse;
+import org.glytoucan.admin.model.UserKeyCheckRequest;
+import org.glytoucan.admin.model.UserKeyCheckResponse;
 import org.glytoucan.admin.model.UserKeyRequest;
 import org.glytoucan.admin.model.UserKeyResponse;
 import org.glytoucan.admin.service.AuthService;
@@ -52,7 +59,7 @@ public class UserEndpoint {
   public UserEndpoint(UserProcedure userProcedure) {
     this.userProcedure = userProcedure;
   }
-  
+
   @Autowired
   AuthService authService;
 
@@ -68,104 +75,216 @@ public class UserEndpoint {
   public UserKeyResponse getKey(@RequestPayload UserKeyRequest request) {
     Assert.notNull(request);
     Assert.notNull(request.getAuthentication());
-    Assert.notNull(request.getEmail());
+    Assert.notNull(request.getAuthentication().getId());
+    Assert.notNull(request.getAuthentication().getApiKey());
+    Assert.notNull(request.getPrimaryId());
 
     ResponseMessage rm = new org.glytoucan.admin.model.ResponseMessage();
+    rm.setTime((new Date()).toString());
     UserKeyResponse ukr = new UserKeyResponse();
 
     try {
       if (!authService.authenticate(request.getAuthentication())) {
-        rm.setErrorCode("-403");
+        rm.setErrorCode("-401");
         rm.setMessage("unauthorized");
-        ukr.setEmail(request.getEmail());
+        ukr.setPrimaryId(request.getPrimaryId());
         ukr.setResponseMessage(rm);
-        return ukr; 
+        return ukr;
       }
     } catch (UserException e1) {
-      rm.setErrorCode("-403");
+      rm.setErrorCode("-401");
       rm.setMessage("failed to authenticate");
-      ukr.setEmail(request.getEmail());
+      ukr.setPrimaryId(request.getPrimaryId());
       ukr.setResponseMessage(rm);
-      return ukr; 
+      return ukr;
     }
-    
-    SparqlEntity se = null;
-	try {
-		ukr = userProcedure.getKey(request);
-	} catch (UserException e) {
-		// invalid data in se, return with errorcode.
-	    rm.setMessage("Invalid Accession Number");
-	    rm.setErrorCode("-100");
-      rm.setTime((new Date()).toString());
-	    ukr.setResponseMessage(rm);
-	    return ukr;
-	}
 
-    rm.setMessage("query result for:>" + request.getEmail());
+    SparqlEntity se = null;
+    try {
+      ukr = userProcedure.getKey(request);
+    } catch (UserException e) {
+      // invalid data in se, return with errorcode.
+      rm.setMessage("Invalid Request" + e.getMessage());
+      rm.setErrorCode("-100");
+      rm.setTime((new Date()).toString());
+      ukr.setResponseMessage(rm);
+      return ukr;
+    }
+
+    rm.setMessage("query result for:>" + request.getPrimaryId());
     rm.setErrorCode("0");
 
     ukr.setResponseMessage(rm);
     return ukr;
   }
 
-//  /**
-//   * 
-//   * Search for entry using sequence text.
-//   * 
-//   * @param sequence
-//   *          text
-//   * @return glycosequencesearchresponse
-//   * 
-//   */
-//  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "glycoSequenceTextSearchRequest")
-//  @ResponsePayload
-//  public GlycoSequenceSearchResponse searchSequence(@RequestPayload GlycoSequenceTextSearchRequest request) {
-//    Assert.notNull(request);
-//    Assert.notNull(request.getSequence());
-//    GlycoSequenceSearchResponse gssr = new GlycoSequenceSearchResponse();
-//
-//    SparqlEntity se;
-//    try {
-//      se = glycanProcedure.searchBySequence(request.getSequence());
-//    } catch (SparqlException | ConvertException e) {
-//      ResponseMessage rm = ResponseMessageGenerator.extractException(e);
-//      rm.setErrorCode(new BigInteger(GlycanProcedure.CouldNotConvertErrorCode));
-//      gssr.setResponseMessage(rm);
-//      return gssr;
-//    }
-//
-//    ResponseMessage rm = new ResponseMessage();
-//    rm.setMessage(se.getValue(GlycanProcedure.FromSequence));
-//    rm.setErrorCode(new BigInteger("0"));
-//
-//    gssr.setAccessionNumber(se.getValue(GlycanProcedure.AccessionNumber));
-//    gssr.setSequence(se.getValue(GlycanProcedure.Sequence));
-//    gssr.setImage(se.getValue(GlycanProcedure.Image));
-//    gssr.setResponseMessage(rm);
-//    return gssr;
-//  }
-//  
-//  /**
-//   * 
-//   * Query for total count.
-//   * 
-//   * @return glycosequencecountresponse
-//   * 
-//   */
-//  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "glycoSequenceCountRequest")
-//  @ResponsePayload
-//  public GlycoSequenceCountResponse countSequence(@RequestPayload GlycoSequenceCountRequest request) {
-//    Assert.notNull(request);
-//    GlycoSequenceCountResponse gscr = new GlycoSequenceCountResponse();
-//
-//    SparqlEntity se = glycanProcedure.getCount();
-//
-//    ResponseMessage rm = new ResponseMessage();
-//    rm.setMessage(se.getValue("total"));
-//    rm.setErrorCode(new BigInteger("0"));
-//
-//    gscr.setCount(se.getValue("total"));
-//    gscr.setResponseMessage(rm);
-//    return gscr;
-//  }
+  /**
+   * 
+   * Query User Details using primaryId.
+   * 
+   * @param accessionNumber
+   * @return
+   */
+  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "userDetailsRequest")
+  @ResponsePayload
+  public UserDetailsResponse userDetailsRequest(@RequestPayload UserDetailsRequest request) {
+    Assert.notNull(request);
+    Assert.notNull(request.getAuthentication());
+    Assert.notNull(request.getPrimaryId());
+
+    ResponseMessage rm = new org.glytoucan.admin.model.ResponseMessage();
+    rm.setTime((new Date()).toString());
+    UserDetailsResponse res = new UserDetailsResponse();
+
+    try {
+      if (!authService.authenticate(request.getAuthentication())) {
+        rm.setErrorCode("-403");
+        rm.setMessage("unauthorized");
+        res.setResponseMessage(rm);
+        return res;
+      }
+    } catch (UserException e1) {
+      rm.setErrorCode("-403");
+      rm.setMessage("failed to authenticate");
+      res.setResponseMessage(rm);
+      return res;
+    }
+
+    SparqlEntity se = null;
+    try {
+      res = userProcedure.getDetails(request);
+    } catch (UserException e) {
+      // invalid data in se, return with errorcode.
+      rm.setMessage("Invalid Accession Number");
+      rm.setErrorCode("-100");
+      rm.setTime((new Date()).toString());
+      res.setResponseMessage(rm);
+      return res;
+    }
+
+    rm.setMessage("query result for:>" + request.getPrimaryId());
+    rm.setErrorCode("0");
+
+    res.setResponseMessage(rm);
+    return res;
+  }
+ 
+  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "userKeyCheckRequest")
+  @ResponsePayload
+  public UserKeyCheckResponse userKeyCheckRequest(@RequestPayload UserKeyCheckRequest request) {
+    Assert.notNull(request);
+    Assert.notNull(request.getAuthentication());
+    Assert.notNull(request.getAuthentication().getId());
+    Assert.notNull(request.getAuthentication().getApiKey());
+    Assert.notNull(request.getPrimaryId());
+    Assert.notNull(request.getApiKey());
+
+    ResponseMessage rm = new org.glytoucan.admin.model.ResponseMessage();
+    rm.setTime((new Date()).toString());
+    UserKeyCheckResponse res = new UserKeyCheckResponse();
+
+    UserDetailsResponse userRes = new UserDetailsResponse();
+    
+    try {
+      if (!authService.authenticate(request.getAuthentication())) {
+        rm.setErrorCode("-403");
+        rm.setMessage("unauthorized");
+        res.setResponseMessage(rm);
+        return res;
+      }
+    } catch (UserException e1) {
+      rm.setErrorCode("-403");
+      rm.setMessage("failed to authenticate");
+      res.setResponseMessage(rm);
+      return res;
+    }
+    UserDetailsRequest userRequest = new UserDetailsRequest();
+    
+    userRequest.setPrimaryId(request.getPrimaryId());
+    
+    SparqlEntity se = null;
+    try {
+      userRes = userProcedure.getDetails(userRequest);
+    } catch (UserException e) {
+      // invalid data in se, return with errorcode.
+      rm.setMessage("Invalid Accession Number");
+      rm.setErrorCode("-100");
+      rm.setTime((new Date()).toString());
+      res.setResponseMessage(rm);
+      return res;
+    }
+    
+    User user = userRes.getUser();
+    
+    if (null == user) {
+      // invalid data in se, return with errorcode.
+      rm.setMessage("User " + request.getPrimaryId() + " does not exist");
+      rm.setErrorCode("-50");
+      rm.setTime((new Date()).toString());
+      res.setResponseMessage(rm);
+      return res;
+     }
+    
+    se = null;
+    try {
+      boolean result = userProcedure.checkApiKey(user.getExternalId(), request.getApiKey());
+      res.setResult(result);
+    } catch (UserException e) {
+      // invalid data in se, return with errorcode.
+      rm.setMessage("Invalid Accession Number");
+      rm.setErrorCode("-100");
+      rm.setTime((new Date()).toString());
+      res.setResponseMessage(rm);
+      return res;
+    }
+
+    rm.setMessage("query result for:>" + request.getPrimaryId());
+    rm.setErrorCode("0");
+
+    res.setResponseMessage(rm);
+    return res;
+  }
+
+  public UserGenerateKeyResponse generateKey(UserGenerateKeyRequest request) {
+    Assert.notNull(request);
+    Assert.notNull(request.getAuthentication());
+    Assert.notNull(request.getPrimaryId());
+
+    ResponseMessage rm = new org.glytoucan.admin.model.ResponseMessage();
+    rm.setTime((new Date()).toString());
+    UserGenerateKeyResponse res = new UserGenerateKeyResponse();
+
+    try {
+      if (!authService.authenticate(request.getAuthentication())) {
+        rm.setErrorCode("-403");
+        rm.setMessage("unauthorized");
+        res.setResponseMessage(rm);
+        return res;
+      }
+    } catch (UserException e1) {
+      rm.setErrorCode("-403");
+      rm.setMessage("failed to authenticate");
+      res.setResponseMessage(rm);
+      return res;
+    }
+
+    SparqlEntity se = null;
+    try {
+      res.setKey(userProcedure.generateHash(request.getPrimaryId()));
+    } catch (UserException e) {
+      // invalid data in se, return with errorcode.
+      rm.setMessage("User Exception:" + e.getMessage());
+      rm.setErrorCode("-100");
+      rm.setTime((new Date()).toString());
+      res.setResponseMessage(rm);
+      return res;
+    }
+
+    rm.setMessage("generated hash for " + request.getPrimaryId());
+    rm.setErrorCode("0");
+
+    res.setResponseMessage(rm);
+    return res;
+  }
+  
 }

@@ -34,6 +34,7 @@ import org.springframework.security.oauth2.client.token.grant.code.Authorization
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
 import org.springframework.ws.server.endpoint.annotation.RequestPayload;
@@ -67,19 +68,30 @@ public class AuthService {
    * @throws UserException
    */
   public boolean authenticate(Authentication auth) throws UserException {
+    
+    System.out.println("user:>" + auth.getId());
+    System.out.println("key:>" + auth.getApiKey());
+
     if (!userProcedure.checkApiKey(auth.getId(), auth.getApiKey())) {
       DefaultOAuth2AccessToken defToken = new DefaultOAuth2AccessToken(auth.getApiKey());
       DefaultOAuth2ClientContext defaultContext = new DefaultOAuth2ClientContext();
       defaultContext.setAccessToken(defToken);
       OAuth2RestOperations rest = new OAuth2RestTemplate(googleOAuth2Details(), defaultContext);
+      UserInfo user = null;
+      try {
       final ResponseEntity<UserInfo> userInfoResponseEntity = rest
           .getForEntity("https://www.googleapis.com/oauth2/v2/userinfo", UserInfo.class);
       logger.debug("userInfo:>" + userInfoResponseEntity.toString());
-      UserInfo user = userInfoResponseEntity.getBody();
+      user = userInfoResponseEntity.getBody();
+      } catch (HttpClientErrorException e) {
+        logger.debug("oauth failed:>" + e.getMessage());
+        return false;
+      }
       String idFromEmail = userProcedure.getIdByEmail(user.getEmail());
       if (StringUtils.equals(idFromEmail, auth.getId()))
         return true;
-    }
+    } else
+      return true;
     return false;
   }
 
