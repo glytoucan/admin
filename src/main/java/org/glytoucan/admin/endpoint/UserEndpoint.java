@@ -16,6 +16,7 @@ import org.glycoinfo.rdf.glycan.Saccharide;
 import org.glycoinfo.rdf.service.GlycanProcedure;
 import org.glycoinfo.rdf.service.exception.InvalidException;
 import org.glytoucan.admin.exception.UserException;
+import org.glytoucan.admin.model.ErrorCode;
 import org.glytoucan.admin.model.ResponseMessage;
 import org.glytoucan.admin.model.User;
 import org.glytoucan.admin.model.UserDetailsRequest;
@@ -81,24 +82,15 @@ public class UserEndpoint {
     Assert.notNull(request.getAuthentication().getApiKey());
     Assert.notNull(request.getPrimaryId());
 
-    ResponseMessage rm = new org.glytoucan.admin.model.ResponseMessage();
-    rm.setTime((new Date()).toString());
     UserKeyResponse ukr = new UserKeyResponse();
 
-    try {
-      if (!authService.authenticate(request.getAuthentication())) {
-        rm.setErrorCode("-401");
-        rm.setMessage("unauthorized");
+    ResponseMessage rm = new ResponseMessage();
+
+    rm = authService.authenticate(request.getAuthentication());
+    if (rm.getErrorCode().equals(ErrorCode.AUTHENTICATION_FAILURE.toString())) {
         ukr.setPrimaryId(request.getPrimaryId());
         ukr.setResponseMessage(rm);
         return ukr;
-      }
-    } catch (UserException e1) {
-      rm.setErrorCode("-401");
-      rm.setMessage("failed to authenticate");
-      ukr.setPrimaryId(request.getPrimaryId());
-      ukr.setResponseMessage(rm);
-      return ukr;
     }
 
     SparqlEntity se = null;
@@ -115,6 +107,7 @@ public class UserEndpoint {
 
     rm.setMessage("query result for:>" + request.getPrimaryId());
     rm.setErrorCode("0");
+    rm.setTime((new Date()).toString());
 
     ukr.setResponseMessage(rm);
     return ukr;
@@ -135,23 +128,16 @@ public class UserEndpoint {
     Assert.notNull(request.getAuthentication());
     Assert.notNull(request.getPrimaryId());
 
-    ResponseMessage rm = new org.glytoucan.admin.model.ResponseMessage();
-    rm.setTime((new Date()).toString());
     UserDetailsResponse res = new UserDetailsResponse();
 
-    try {
-      if (!authService.authenticate(request.getAuthentication())) {
-        rm.setErrorCode("-403");
-        rm.setMessage("unauthorized");
-        res.setResponseMessage(rm);
-        return res;
-      }
-    } catch (UserException e1) {
-      rm.setErrorCode("-403");
-      rm.setMessage("failed to authenticate");
+    ResponseMessage rm = new ResponseMessage();
+    rm = authService.authenticate(request.getAuthentication());
+    if (rm.getErrorCode().equals(ErrorCode.AUTHENTICATION_FAILURE.toString())) {
+      rm.setTime((new Date()).toString());
       res.setResponseMessage(rm);
       return res;
     }
+    rm.setTime((new Date()).toString());
 
     SparqlEntity se = null;
     try {
@@ -183,25 +169,18 @@ public class UserEndpoint {
     Assert.notNull(request.getContributorId());
     Assert.notNull(request.getApiKey());
 
-    ResponseMessage rm = new org.glytoucan.admin.model.ResponseMessage();
-    rm.setTime((new Date()).toString());
     UserKeyCheckResponse res = new UserKeyCheckResponse();
 
 //    UserDetailsResponse userRes = new UserDetailsResponse();
     
-    try {
-      if (!authService.authenticate(request.getAuthentication())) {
-        rm.setErrorCode("-403");
-        rm.setMessage("unauthorized");
-        res.setResponseMessage(rm);
-        return res;
-      }
-    } catch (UserException e1) {
-      rm.setErrorCode("-403");
-      rm.setMessage("failed to authenticate");
+    ResponseMessage rm = new ResponseMessage();
+    rm = authService.authenticate(request.getAuthentication());
+    if (rm.getErrorCode().equals(ErrorCode.AUTHENTICATION_FAILURE.toString())) {
+      rm.setTime((new Date()).toString());
       res.setResponseMessage(rm);
       return res;
     }
+    rm.setTime((new Date()).toString());
 //    UserDetailsRequest userRequest = new UserDetailsRequest();
     
 //    userRequest.setPrimaryId(request.getPrimaryId());
@@ -256,23 +235,16 @@ public class UserEndpoint {
     Assert.notNull(request.getAuthentication());
     Assert.notNull(request.getPrimaryId());
 
-    ResponseMessage rm = new org.glytoucan.admin.model.ResponseMessage();
-    rm.setTime((new Date()).toString());
     UserGenerateKeyResponse res = new UserGenerateKeyResponse();
 
-    try {
-      if (!authService.authenticate(request.getAuthentication())) {
-        rm.setErrorCode("-403");
-        rm.setMessage("unauthorized");
-        res.setResponseMessage(rm);
-        return res;
-      }
-    } catch (UserException e1) {
-      rm.setErrorCode("-403");
-      rm.setMessage("failed to authenticate");
+    ResponseMessage rm = new ResponseMessage();
+    rm = authService.authenticate(request.getAuthentication());
+    if (rm.getErrorCode().equals(ErrorCode.AUTHENTICATION_FAILURE.toString())) {
+      rm.setTime((new Date()).toString());
       res.setResponseMessage(rm);
       return res;
     }
+    rm.setTime((new Date()).toString());
 
     SparqlEntity se = null;
     try {

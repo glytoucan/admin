@@ -3,6 +3,8 @@ package org.glytoucan.admin.service;
 import org.glytoucan.admin.Application;
 import org.glytoucan.admin.exception.UserException;
 import org.glytoucan.admin.model.Authentication;
+import org.glytoucan.admin.model.ErrorCode;
+import org.glytoucan.admin.model.ResponseMessage;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,8 +34,9 @@ public class AuthServiceTest {
     auth.setId(id);
     auth.setApiKey(token);
     
-    boolean result = authService.authenticate(auth);
-    Assert.assertFalse(result);
+    ResponseMessage result = authService.authenticate(auth);
+    Assert.assertNotNull(result);
+    Assert.assertEquals(result.getErrorCode(), ErrorCode.AUTHENTICATION_FAILURE.toString());
     
   }
   
@@ -47,7 +50,8 @@ public class AuthServiceTest {
     auth.setId(id);
     auth.setApiKey(token);
     
-    boolean result = authService.authenticate(auth);
-    Assert.assertTrue(result); 
+    ResponseMessage result = authService.authenticate(auth);
+    Assert.assertNotNull(result);
+    Assert.assertEquals(result.getErrorCode(), ErrorCode.AUTHENTICATION_SUCCESS.toString());
   }
 }

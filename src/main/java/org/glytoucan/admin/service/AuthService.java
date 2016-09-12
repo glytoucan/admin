@@ -20,6 +20,7 @@ import org.glycoinfo.rdf.service.GlycanProcedure;
 import org.glycoinfo.rdf.service.exception.InvalidException;
 import org.glytoucan.admin.exception.UserException;
 import org.glytoucan.admin.model.Authentication;
+import org.glytoucan.admin.model.ErrorCode;
 import org.glytoucan.admin.model.ResponseMessage;
 import org.glytoucan.admin.model.UserKeyRequest;
 import org.glytoucan.admin.model.UserKeyResponse;
@@ -69,32 +70,50 @@ public class AuthService {
    * @throws UserException
    */
   @Transactional
-  public boolean authenticate(Authentication auth) throws UserException {
-    
+  public ResponseMessage authenticate(Authentication auth) {
     System.out.println("user:>" + auth.getId());
     System.out.println("key:>" + auth.getApiKey());
+    String id = auth.getId();
 
-    if (!userProcedure.checkApiKey(auth.getId(), auth.getApiKey())) {
-      DefaultOAuth2AccessToken defToken = new DefaultOAuth2AccessToken(auth.getApiKey());
-      DefaultOAuth2ClientContext defaultContext = new DefaultOAuth2ClientContext();
-      defaultContext.setAccessToken(defToken);
-      OAuth2RestOperations rest = new OAuth2RestTemplate(googleOAuth2Details(), defaultContext);
-      UserInfo user = null;
-      try {
-      final ResponseEntity<UserInfo> userInfoResponseEntity = rest
-          .getForEntity("https://www.googleapis.com/oauth2/v2/userinfo", UserInfo.class);
-      logger.debug("userInfo:>" + userInfoResponseEntity.toString());
-      user = userInfoResponseEntity.getBody();
-      } catch (HttpClientErrorException e) {
-        logger.debug("oauth failed:>" + e.getMessage());
-        return false;
+    ResponseMessage rm = new ResponseMessage();
+    rm.setErrorCode(ErrorCode.AUTHENTICATION_SUCCESS.toString());
+    try {
+      if (StringUtils.contains(id, "@")) {
+        id = userProcedure.getIdByEmail(id);
       }
-      String idFromEmail = userProcedure.getIdByEmail(user.getEmail());
-      if (StringUtils.equals(idFromEmail, auth.getId()))
-        return true;
-    } else
-      return true;
-    return false;
+      if (!userProcedure.checkApiKey(id, auth.getApiKey())) {
+        DefaultOAuth2AccessToken defToken = new DefaultOAuth2AccessToken(auth.getApiKey());
+        DefaultOAuth2ClientContext defaultContext = new DefaultOAuth2ClientContext();
+        defaultContext.setAccessToken(defToken);
+        OAuth2RestOperations rest = new OAuth2RestTemplate(googleOAuth2Details(), defaultContext);
+        UserInfo user = null;
+        try {
+          final ResponseEntity<UserInfo> userInfoResponseEntity = rest
+              .getForEntity("https://www.googleapis.com/oauth2/v2/userinfo", UserInfo.class);
+          logger.debug("userInfo:>" + userInfoResponseEntity.toString());
+          user = userInfoResponseEntity.getBody();
+        } catch (HttpClientErrorException e) {
+          logger.debug("oauth failed:>" + e.getMessage());
+          rm.setErrorCode(ErrorCode.AUTHENTICATION_FAILURE.toString());
+          rm.setMessage("oauth failed:>" + e.getMessage());
+          return rm;
+        }
+        String idFromEmail = userProcedure.getIdByEmail(user.getEmail());
+        if (!StringUtils.equals(idFromEmail, auth.getId())) {
+          rm.setErrorCode(ErrorCode.AUTHENTICATION_FAILURE.toString());
+          rm.setMessage("id do not equal:>" + idFromEmail + "<> " + auth.getId());
+          return rm;
+        }
+      } else {
+        return rm;
+      }
+    } catch (UserException e1) {
+      rm.setErrorCode(ErrorCode.AUTHENTICATION_FAILURE.toString());
+      rm.setMessage("rdf checks failed:>" + e1.getMessage());
+      return rm;
+    }
+
+    return rm;
   }
 
   public OAuth2ProtectedResourceDetails googleOAuth2Details() {

@@ -130,6 +130,7 @@
 			<xs:enumeration value="INVALID_KEY" />
 			<xs:enumeration value="INVALID_PARAMETERS" />
 			<xs:enumeration value="INVALID_EMAIL" />
+			<xs:enumeration value="SERVICE_EXCEPTION" />
 		</xs:restriction>
 	</xs:simpleType>
 

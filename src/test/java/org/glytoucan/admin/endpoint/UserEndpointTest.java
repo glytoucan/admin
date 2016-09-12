@@ -20,6 +20,7 @@ import org.glycoinfo.rdf.SparqlException;
 import org.glycoinfo.rdf.service.GlycanProcedure;
 import org.glytoucan.admin.Application;
 import org.glytoucan.admin.model.Authentication;
+import org.glytoucan.admin.model.ErrorCode;
 import org.glytoucan.admin.model.Authentication;
 import org.glytoucan.admin.model.UserDetailsRequest;
 import org.glytoucan.admin.model.UserDetailsResponse;
@@ -111,7 +112,7 @@ public class UserEndpointTest {
 		UserKeyResponse response = (UserKeyResponse)result;
 		logger.debug(response);
 		logger.debug(response.getKey());
-		Assert.assertEquals("-401",response.getResponseMessage().getErrorCode());
+		Assert.assertEquals(ErrorCode.AUTHENTICATION_FAILURE.toString(),response.getResponseMessage().getErrorCode());
 		Assert.assertNull(response.getKey());
 	}
 	
