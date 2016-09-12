@@ -121,5 +121,16 @@
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
+	
+	<xs:simpleType name="errorCode">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="AUTHENTICATION_FAILURE" />
+			<xs:enumeration value="AUTHENTICATION_SUCCESS" />
+			<xs:enumeration value="INVALID_TOKEN" />
+			<xs:enumeration value="INVALID_KEY" />
+			<xs:enumeration value="INVALID_PARAMETERS" />
+			<xs:enumeration value="INVALID_EMAIL" />
+		</xs:restriction>
+	</xs:simpleType>
 
 </xs:schema>
