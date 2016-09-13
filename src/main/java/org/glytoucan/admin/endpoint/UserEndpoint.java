@@ -27,6 +27,8 @@ import org.glytoucan.admin.model.UserKeyCheckRequest;
 import org.glytoucan.admin.model.UserKeyCheckResponse;
 import org.glytoucan.admin.model.UserKeyRequest;
 import org.glytoucan.admin.model.UserKeyResponse;
+import org.glytoucan.admin.model.UserRegisterRequest;
+import org.glytoucan.admin.model.UserRegisterResponse;
 import org.glytoucan.admin.service.AuthService;
 import org.glytoucan.admin.service.UserProcedure;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -230,7 +232,7 @@ public class UserEndpoint {
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "userGenerateKeyRequest")
   @ResponsePayload
   @Transactional
-  public UserGenerateKeyResponse generateKey(UserGenerateKeyRequest request) {
+  public UserGenerateKeyResponse generateKey(@RequestPayload UserGenerateKeyRequest request) {
     Assert.notNull(request);
     Assert.notNull(request.getAuthentication());
     Assert.notNull(request.getPrimaryId());
@@ -265,4 +267,55 @@ public class UserEndpoint {
     return res;
   }
   
+  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "userRegisterRequest")
+  @Transactional
+  @ResponsePayload
+  public UserRegisterResponse userRegisterRequest(@RequestPayload UserRegisterRequest request) {
+    Assert.notNull(request);
+    Assert.notNull(request.getAuthentication());
+    Assert.notNull(request.getUser());
+
+    User user = request.getUser();
+    UserRegisterResponse res = new UserRegisterResponse();
+
+    ResponseMessage rm = new ResponseMessage();
+    rm = authService.authenticate(request.getAuthentication());
+    if (rm.getErrorCode().equals(ErrorCode.AUTHENTICATION_FAILURE.toString())) {
+      rm.setTime((new Date()).toString());
+      res.setResponseMessage(rm);
+      return res;
+    }
+    rm.setTime((new Date()).toString());
+
+    SparqlEntity se = new SparqlEntity();
+    se.setValue(UserProcedure.EMAIL, user.getEmail());
+    se.setValue(UserProcedure.GIVEN_NAME, user.getGivenName());
+    se.setValue(UserProcedure.FAMILY_NAME, user.getFamilyName());
+    se.setValue(UserProcedure.VERIFIED_EMAIL, user.getEmailVerified());
+    se.setValue(UserProcedure.CONTRIBUTOR_ID, user.getExternalId());
+    
+    try {
+      userProcedure.add(se);
+    } catch (UserException e) {
+      // invalid data in se, return with errorcode.
+      rm.setMessage("User Exception:" + e.getMessage());
+      rm.setErrorCode(ErrorCode.INVALID_PARAMETERS.toString());
+      rm.setTime((new Date()).toString());
+      res.setResponseMessage(rm);
+      return res;
+    }
+    
+    UserDetailsRequest udr = new UserDetailsRequest();
+    udr.setAuthentication(request.getAuthentication());
+    udr.setPrimaryId(user.getEmail());
+    UserDetailsResponse response = userDetailsRequest(udr);
+    user = response.getUser();
+    
+    rm.setMessage("User generated for " + user.getGivenName());
+    rm.setErrorCode("0");
+    res.setResponseMessage(rm);
+    res.setUser(user);
+    
+    return res;
+  }
 }

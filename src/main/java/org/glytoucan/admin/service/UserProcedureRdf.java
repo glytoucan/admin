@@ -555,6 +555,26 @@ public class UserProcedureRdf implements UserProcedure {
         user.setPrimaryId(sResultsSE.getValue(ID));
       }
       
+      String primaryId = NumberGenerator.generateHash(id, new Date(0));
+      final SparqlEntity sparqlentityPerson = new SparqlEntity(primaryId);
+
+      // Organization entity
+      SparqlEntity sparqlentityOrganization = new SparqlEntity(UserProcedure.GLYTOUCAN_ORG);
+      try {
+        selectScintOrganization.update(sparqlentityOrganization);
+      } catch (SparqlException e) {
+        throw new UserException(e);
+      }
+
+      sparqlentityPerson.setValue("contributor", selectScintOrganization);
+      
+      selectScintPerson.update(sparqlentityPerson);
+      List<SparqlEntity> results = sparqlDAO.query(selectScintPerson.getSparqlBean());
+      if (results.size() > 0)
+        user.setEmailVerified(VERIFIED_EMAIL_TRUE);
+      else
+        user.setEmailVerified(VERIFIED_EMAIL_FALSE);
+      
       res.setUser(user);
 
     } catch (SparqlException e) {

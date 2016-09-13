@@ -21,6 +21,7 @@ import org.glycoinfo.rdf.service.GlycanProcedure;
 import org.glytoucan.admin.Application;
 import org.glytoucan.admin.model.Authentication;
 import org.glytoucan.admin.model.ErrorCode;
+import org.glytoucan.admin.model.User;
 import org.glytoucan.admin.model.Authentication;
 import org.glytoucan.admin.model.UserDetailsRequest;
 import org.glytoucan.admin.model.UserDetailsResponse;
@@ -30,6 +31,8 @@ import org.glytoucan.admin.model.UserKeyCheckRequest;
 import org.glytoucan.admin.model.UserKeyCheckResponse;
 import org.glytoucan.admin.model.UserKeyRequest;
 import org.glytoucan.admin.model.UserKeyResponse;
+import org.glytoucan.admin.model.UserRegisterRequest;
+import org.glytoucan.admin.model.UserRegisterResponse;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -257,20 +260,21 @@ public class UserEndpointTest {
      Assert.assertTrue(result.isResult());
    }
    
-//   @Test
-   public void testGenerateHash() {
+   @Test
+   @Transactional
+   public void testGenerateHashDirect() {
      UserGenerateKeyRequest request = new UserGenerateKeyRequest();
      Authentication auth = new Authentication();
      auth.setId("1");
      auth.setApiKey(apiKey);
      request.setAuthentication(auth);
-     request.setPrimaryId("glytoucan@gmail.com");
+     request.setPrimaryId("testglytoucan@gmail.com"); // assuming this exists - will be created with other indirect test case 
      
-//     UserGenerateKeyResponse result = userEndpoint.generateKey(request);
-     Object wsResult = new WebServiceTemplate(marshaller).marshalSendAndReceive("http://localhost:"
-         + port + "/ws", request);
-     assertNotNull(wsResult);
-     UserGenerateKeyResponse result = (UserGenerateKeyResponse)wsResult;
+     UserGenerateKeyResponse result = userEndpoint.generateKey(request);
+//     Object wsResult = new WebServiceTemplate(marshaller).marshalSendAndReceive("http://localhost:"
+//         + port + "/ws", request);
+//     assertNotNull(wsResult);
+//     UserGenerateKeyResponse result = (UserGenerateKeyResponse)wsResult;
      assertNotNull(result);
      logger.debug(result);
      logger.debug(result.getResponseMessage());
@@ -296,6 +300,102 @@ public class UserEndpointTest {
          }
      }
      logger.debug(os.toString());
-     
+   }
+   
+   
+   @Test
+   @Transactional
+   public void testUserAddDirect() {
+     UserRegisterRequest request = new UserRegisterRequest();
+     Authentication auth = new Authentication();
+     auth.setId("1");
+     auth.setApiKey(apiKey);
+     request.setAuthentication(auth);
+     User user = new User();
+     user.setEmail("testglytoucanfalse@gmail.com");
+     user.setEmailVerified("false");
+     user.setExternalId("12");
+     user.setGivenName("testfalse");
+     user.setFamilyName("familyName");
+     request.setUser(user);
+
+     UserRegisterResponse result = userEndpoint.userRegisterRequest(request);
+//     Object wsResult = new WebServiceTemplate(marshaller).marshalSendAndReceive("http://localhost:"
+//         + port + "/ws", request);
+//     assertNotNull(wsResult);
+//     UserKeyCheckResponse result = (UserKeyCheckResponse)wsResult;
+     assertNotNull(result);
+     logger.debug(result);
+     logger.debug(result.getResponseMessage());
+     logger.debug(result.getResponseMessage().getTime());
+     Assert.assertEquals("0",result.getResponseMessage().getErrorCode());
+     Assert.assertEquals(user.getEmail(), result.getUser().getEmail());
+     Assert.assertEquals(user.getGivenName(), result.getUser().getGivenName());
+     Assert.assertEquals(user.getExternalId(), result.getUser().getExternalId());
+     Assert.assertEquals(user.getEmailVerified(), result.getUser().getEmailVerified());
+   }
+   
+   @Test
+   @Transactional
+   public void testUserAddVerifiedDirect() {
+     UserRegisterRequest request = new UserRegisterRequest();
+     Authentication auth = new Authentication();
+     auth.setId("1");
+     auth.setApiKey(apiKey);
+     request.setAuthentication(auth);
+     User user = new User();
+     user.setEmail("testglytoucan11@gmail.com");
+     user.setEmailVerified("true");
+     user.setExternalId("11");
+     user.setGivenName("test11");
+     user.setFamilyName("familyName");
+     request.setUser(user);
+
+     UserRegisterResponse result = userEndpoint.userRegisterRequest(request);
+//     Object wsResult = new WebServiceTemplate(marshaller).marshalSendAndReceive("http://localhost:"
+//         + port + "/ws", request);
+//     assertNotNull(wsResult);
+//     UserKeyCheckResponse result = (UserKeyCheckResponse)wsResult;
+     assertNotNull(result);
+     logger.debug(result);
+     logger.debug(result.getResponseMessage());
+     logger.debug(result.getResponseMessage().getTime());
+     Assert.assertEquals("0",result.getResponseMessage().getErrorCode());
+     Assert.assertEquals(user.getEmail(), result.getUser().getEmail());
+     Assert.assertEquals(user.getGivenName(), result.getUser().getGivenName());
+     Assert.assertEquals(user.getExternalId(), result.getUser().getExternalId());
+     Assert.assertEquals(user.getEmailVerified(), result.getUser().getEmailVerified());
+   }
+   
+   @Test
+   @Transactional
+   public void testUserAdd() {
+     UserRegisterRequest request = new UserRegisterRequest();
+     Authentication auth = new Authentication();
+     auth.setId("1");
+     auth.setApiKey(apiKey);
+     request.setAuthentication(auth);
+     User user = new User();
+     user.setEmail("testglytoucan@gmail.com");
+     user.setEmailVerified("true");
+     user.setExternalId("10");
+     user.setGivenName("test");
+     user.setFamilyName("familyName");
+     request.setUser(user);
+
+//     UserRegisterResponse result = userEndpoint.register(request);
+    Object wsResult = new WebServiceTemplate(marshaller).marshalSendAndReceive("http://localhost:"
+         + port + "/ws", request);
+     assertNotNull(wsResult);
+     UserRegisterResponse result = (UserRegisterResponse)wsResult;
+     assertNotNull(result);
+     logger.debug(result);
+     logger.debug(result.getResponseMessage());
+     logger.debug(result.getResponseMessage().getTime());
+     Assert.assertEquals("0",result.getResponseMessage().getErrorCode());
+     Assert.assertEquals(user.getEmail(), result.getUser().getEmail());
+     Assert.assertEquals(user.getGivenName(), result.getUser().getGivenName());
+     Assert.assertEquals(user.getExternalId(), result.getUser().getExternalId());
+     Assert.assertEquals(user.getEmailVerified(), result.getUser().getEmailVerified());
    }
 }

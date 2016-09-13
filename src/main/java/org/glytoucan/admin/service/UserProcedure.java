@@ -20,9 +20,10 @@ public interface UserProcedure {
 	public static final String FAMILY_NAME = "familyName";
 	public static final String GENDER = "gender";
 	public static final String PICTURE = "picture";
-	public static final String EMAIL ="email", VERIFIED_EMAIL="verifiedEmail";
+	public static final String EMAIL ="email", VERIFIED_EMAIL="verifiedEmail", VERIFIED_EMAIL_TRUE="true", VERIFIED_EMAIL_FALSE="false";
 	public static final String CONTRIBUTOR_ID = "alternateName"; // shortcut to map contributor id into Person;
 	public static final String PROGRAM_NAME = "programName";
+  public static final String GLYTOUCAN_ORG = "glytoucan";
 	public static final String GLYTOUCAN_PROGRAM = "glytoucanPartnerProgram";
 	public static final String GLYTOUCAN_PROGRAM_TITLE = "Glytoucan Partner";
 	public static final String MEMBERSHIP_NUMBER = "membershipNumber";
