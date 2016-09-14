@@ -4,4 +4,4 @@ bin
 .settings
 target
 pom.xml.versionsBackup
-api.log
+admin.log

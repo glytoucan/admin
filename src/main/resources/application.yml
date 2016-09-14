@@ -20,6 +20,9 @@ mail:
   body:
     newRegistration: newRegistration.vm
     notifyRegistration: notifyRegistration.vm
+---
+spring:
+  profiles: development
 logging:
-  file: api.log
+  file: admin.log
   path: /tmp/glytoucan/
