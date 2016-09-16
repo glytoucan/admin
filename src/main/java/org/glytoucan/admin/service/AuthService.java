@@ -78,9 +78,9 @@ public class AuthService {
     ResponseMessage rm = new ResponseMessage();
     rm.setErrorCode(ErrorCode.AUTHENTICATION_SUCCESS.toString());
     try {
-      if (StringUtils.contains(id, "@")) {
-        id = userProcedure.getIdByEmail(id);
-      }
+//      if (StringUtils.contains(id, "@")) {
+//        id = userProcedure.getIdByEmail(id);
+//      }
       if (!userProcedure.checkApiKey(id, auth.getApiKey())) {
         DefaultOAuth2AccessToken defToken = new DefaultOAuth2AccessToken(auth.getApiKey());
         DefaultOAuth2ClientContext defaultContext = new DefaultOAuth2ClientContext();

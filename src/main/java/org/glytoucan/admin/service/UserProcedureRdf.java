@@ -128,7 +128,7 @@ public class UserProcedureRdf implements UserProcedure {
       throw new UserException("not all required fields are supplied");
     }
 
-    String id = NumberGenerator.generateHash(userSparqlEntity.getValue(UserProcedureRdf.EMAIL), new Date(0));
+    String id = determinePrimaryKey(userSparqlEntity.getValue(UserProcedureRdf.EMAIL));
 
     SparqlEntity userdetails = getById(userSparqlEntity.getValue(UserProcedureRdf.EMAIL));
 
@@ -197,7 +197,7 @@ public class UserProcedureRdf implements UserProcedure {
     try {
       // before insert, hash the id.
       sparqlentityPerson.setValue(SelectSparql.PRIMARY_KEY,
-          NumberGenerator.generateHash(userSparqlEntity.getValue(UserProcedureRdf.EMAIL), new Date(0)));
+          determinePrimaryKey(userSparqlEntity.getValue(UserProcedureRdf.EMAIL)));
       insertScintPerson.update(sparqlentityPerson);
 
       sparqlDAO.insert(insertScintPerson.getSparqlBean());
@@ -258,7 +258,7 @@ public class UserProcedureRdf implements UserProcedure {
 
     try {
       // check if it exists
-      SparqlEntity sparqlEntityPerson = new SparqlEntity(NumberGenerator.generateHash(id, new Date(0)));
+      SparqlEntity sparqlEntityPerson = new SparqlEntity(determinePrimaryKey(id));
       sparqlEntityPerson.setValue(Scintillate.NO_DOMAINS, SelectSparql.TRUE);
       selectScintPerson.update(sparqlEntityPerson);
       List<SparqlEntity> person = sparqlDAO.query(selectScintPerson.getSparqlBean());
@@ -329,7 +329,7 @@ public class UserProcedureRdf implements UserProcedure {
     try {
 
       // set the main unique identifier
-      String id = NumberGenerator.generateHash(primaryId, new Date(0));
+      String id = determinePrimaryKey(primaryId);
       SparqlEntity userSE = new SparqlEntity(id);
 
       // Select Person
@@ -456,22 +456,22 @@ public class UserProcedureRdf implements UserProcedure {
       hash = hash.trim();
       username = username.trim();
 
-      SparqlEntity sparqlEntityPerson = new SparqlEntity();
-      sparqlEntityPerson.setValue(UserProcedureRdf.CONTRIBUTOR_ID, username);
-      sparqlEntityPerson.setValue(UserProcedureRdf.MEMBER_OF, null);
-      sparqlEntityPerson.setValue(Scintillate.NO_DOMAINS, SelectSparql.TRUE);
-      selectScintPerson.update(sparqlEntityPerson);
+//      SparqlEntity sparqlEntityPerson = new SparqlEntity(determinePrimaryKey(username));
+////      sparqlEntityPerson.setValue(UserProcedureRdf.CONTRIBUTOR_ID, username);
+//      sparqlEntityPerson.setValue(UserProcedureRdf.MEMBER_OF, null);
+//      sparqlEntityPerson.setValue(Scintillate.NO_DOMAINS, SelectSparql.TRUE);
+//      selectScintPerson.update(sparqlEntityPerson);
+//
+//      List<SparqlEntity> results = sparqlDAO.query(selectScintPerson.getSparqlBean());
+//
+//      if (null == results || !results.iterator().hasNext())
+//        return false;
+//
+//      SparqlEntity se = results.iterator().next();
+//
+//      selectScintPerson.update(se);
 
-      List<SparqlEntity> results = sparqlDAO.query(selectScintPerson.getSparqlBean());
-
-      if (null == results || !results.iterator().hasNext())
-        return false;
-
-      SparqlEntity se = results.iterator().next();
-
-      selectScintPerson.update(se);
-
-      SparqlEntity pmSE = new SparqlEntity(GLYTOUCAN_PROGRAM + selectScintPerson.getPrimaryKey());
+      SparqlEntity pmSE = new SparqlEntity(GLYTOUCAN_PROGRAM + determinePrimaryKey(username));
       pmSE.setValue(UserProcedureRdf.MEMBER, selectScintPerson);
       pmSE.setValue(UserProcedureRdf.MEMBERSHIP_NUMBER, null);
       pmSE.setValue(Scintillate.NO_DOMAINS, true);
@@ -502,7 +502,7 @@ public class UserProcedureRdf implements UserProcedure {
   @Transactional
   public UserKeyResponse getKey(UserKeyRequest req) throws UserException {
     String email = req.getPrimaryId();
-    String primaryKey = NumberGenerator.generateHash(email, new Date(0));
+    String primaryKey = determinePrimaryKey(email);
     SparqlEntity sparqlEntityPerson = new SparqlEntity(primaryKey);
     UserKeyResponse ukr = new UserKeyResponse();
     try {
@@ -534,7 +534,7 @@ public class UserProcedureRdf implements UserProcedure {
   @Transactional
   public UserDetailsResponse getDetails(UserDetailsRequest req) throws UserException {
     String id = req.getPrimaryId();
-    String primaryKey = NumberGenerator.generateHash(id, new Date(0));
+    String primaryKey = determinePrimaryKey(id);
     SparqlEntity sparqlEntityPerson = new SparqlEntity(primaryKey);
     UserDetailsResponse res = new UserDetailsResponse();
     try {
@@ -555,7 +555,7 @@ public class UserProcedureRdf implements UserProcedure {
         user.setPrimaryId(sResultsSE.getValue(ID));
       }
       
-      String primaryId = NumberGenerator.generateHash(id, new Date(0));
+      String primaryId = determinePrimaryKey(id);
       final SparqlEntity sparqlentityPerson = new SparqlEntity(primaryId);
 
       // Organization entity
@@ -582,5 +582,9 @@ public class UserProcedureRdf implements UserProcedure {
     }
     
     return res;
+  }
+  
+  private String determinePrimaryKey(String email) {
+    return NumberGenerator.generateHash(email, new Date(0));
   }
 }

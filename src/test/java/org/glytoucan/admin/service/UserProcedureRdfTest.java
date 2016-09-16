@@ -262,7 +262,7 @@ public class UserProcedureRdfTest {
 
     SparqlEntity sePerson = userProcedure.getById(se.getValue(UserProcedure.EMAIL));
 
-    Assert.assertTrue(userProcedure.checkApiKey(sePerson.getValue(UserProcedure.CONTRIBUTOR_ID), hash));
+    Assert.assertTrue(userProcedure.checkApiKey(sePerson.getValue(UserProcedure.EMAIL), hash));
   }
 
   @Test

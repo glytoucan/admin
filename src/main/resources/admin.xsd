@@ -26,6 +26,7 @@
 			<xs:element name="email" type="xs:string" />
 			<xs:element name="emailVerified" type="xs:string" />
 			<xs:element name="externalId" type="xs:string" />
+			<xs:element name="membershipNumber" type="xs:string" />
 		</xs:sequence>
 	</xs:complexType>
 

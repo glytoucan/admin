@@ -97,13 +97,14 @@ public class UserEndpointTest {
   String token="ya29.CjBXA4l-rJxxG7g2PpaTzo3061sa6KIlLzF6y-SX39VRQjKVRGaWcqoZkvxVb48FX6U";
 //  String apiKey = "JDUkMjAxNjA5MDUwOTM5MjMkVWZzaHNyRVFkMVl4Umx0MjJiczVyZFZVNDQ5bUJBVTBoQTdaeGpiUkRpMw==";
   String apiKey = "JDUkMjAxNjA5MDUwOTM5MjMkVWZzaHNyRVFkMVl4Umx0MjJiczVyZFZVNDQ5bUJBVTBoQTdaeGpiUkRpMw==";
+  String adminEmail = "glytoucan@gmail.com";
 
 	@Test
 	@Transactional
 	public void testInvalidAuth() {
 		UserKeyRequest request = new UserKeyRequest();
 		Authentication auth = new Authentication();
-		auth.setId("1");
+		auth.setId(adminEmail);
 		auth.setApiKey("invalidtoken");
 //  auth.setApiKey(apiKey);
 		request.setAuthentication(auth);
@@ -123,7 +124,7 @@ public class UserEndpointTest {
 	  public void testTokenRequest() {
 	    UserKeyRequest request = new UserKeyRequest();
 	    Authentication auth = new Authentication();
-	    auth.setId("1");
+	    auth.setId(adminEmail);
 	    auth.setApiKey(token);
 	    request.setAuthentication(auth);
 	    request.setPrimaryId("glytoucan@gmail.com");
@@ -144,7 +145,7 @@ public class UserEndpointTest {
 	   public void testUserKeyDirect() {
 	     UserKeyRequest request = new UserKeyRequest();
 	     Authentication auth = new Authentication();
-	     auth.setId("1");
+	     auth.setId(adminEmail);
 	     auth.setApiKey(apiKey);
 	     request.setAuthentication(auth);
 	     request.setPrimaryId("glytoucan@gmail.com");
@@ -156,7 +157,6 @@ public class UserEndpointTest {
 	     logger.debug(response.getKey());
 	     Assert.assertEquals("0",response.getResponseMessage().getErrorCode());
 	     Assert.assertNotNull(response.getKey());
-
 	   }
 	   
    @Test
@@ -164,7 +164,7 @@ public class UserEndpointTest {
    public void testUserKey() {
      UserKeyRequest request = new UserKeyRequest();
      Authentication auth = new Authentication();
-     auth.setId("1");
+     auth.setId(adminEmail);
      auth.setApiKey(apiKey);
      request.setAuthentication(auth);
      request.setPrimaryId("glytoucan@gmail.com");
@@ -188,7 +188,7 @@ public class UserEndpointTest {
    public void testUserDetails() {
      UserDetailsRequest request = new UserDetailsRequest();
      Authentication auth = new Authentication();
-     auth.setId("1");
+     auth.setId(adminEmail);
      auth.setApiKey(apiKey);
      request.setAuthentication(auth);
      request.setPrimaryId("glytoucan@gmail.com");
@@ -215,10 +215,10 @@ public class UserEndpointTest {
    public void testUserKeyCheckRequest() {
      UserKeyCheckRequest request = new UserKeyCheckRequest();
      Authentication auth = new Authentication();
-     auth.setId("1");
+     auth.setId(adminEmail);
      auth.setApiKey(apiKey);
      request.setAuthentication(auth);
-     request.setContributorId("1");
+     request.setContributorId(adminEmail);
      request.setApiKey(apiKey);
      marshaller.setPackagesToScan(ClassUtils.getPackageName(UserKeyCheckRequest.class));
 
@@ -240,10 +240,10 @@ public class UserEndpointTest {
    public void testUserKeyCheckRequestDirect() {
      UserKeyCheckRequest request = new UserKeyCheckRequest();
      Authentication auth = new Authentication();
-     auth.setId("1");
+     auth.setId(adminEmail);
      auth.setApiKey(apiKey);
      request.setAuthentication(auth);
-     request.setContributorId("1");
+     request.setContributorId(adminEmail);
      request.setApiKey(apiKey);
      marshaller.setPackagesToScan(ClassUtils.getPackageName(UserKeyCheckRequest.class));
 
@@ -265,7 +265,7 @@ public class UserEndpointTest {
    public void testGenerateHashDirect() {
      UserGenerateKeyRequest request = new UserGenerateKeyRequest();
      Authentication auth = new Authentication();
-     auth.setId("1");
+     auth.setId(adminEmail);
      auth.setApiKey(apiKey);
      request.setAuthentication(auth);
      request.setPrimaryId("testglytoucan@gmail.com"); // assuming this exists - will be created with other indirect test case 
@@ -287,7 +287,7 @@ public class UserEndpointTest {
    public void testMarshaller() throws IOException {
      UserGenerateKeyRequest request = new UserGenerateKeyRequest();
      Authentication auth = new Authentication();
-     auth.setId("1");
+     auth.setId(adminEmail);
      auth.setApiKey(apiKey);
      request.setAuthentication(auth);
      java.io.ByteArrayOutputStream os = new java.io.ByteArrayOutputStream();
@@ -308,7 +308,7 @@ public class UserEndpointTest {
    public void testUserAddDirect() {
      UserRegisterRequest request = new UserRegisterRequest();
      Authentication auth = new Authentication();
-     auth.setId("1");
+     auth.setId(adminEmail);
      auth.setApiKey(apiKey);
      request.setAuthentication(auth);
      User user = new User();
@@ -340,7 +340,7 @@ public class UserEndpointTest {
    public void testUserAddVerifiedDirect() {
      UserRegisterRequest request = new UserRegisterRequest();
      Authentication auth = new Authentication();
-     auth.setId("1");
+     auth.setId(adminEmail);
      auth.setApiKey(apiKey);
      request.setAuthentication(auth);
      User user = new User();
@@ -372,7 +372,7 @@ public class UserEndpointTest {
    public void testUserAdd() {
      UserRegisterRequest request = new UserRegisterRequest();
      Authentication auth = new Authentication();
-     auth.setId("1");
+     auth.setId(adminEmail);
      auth.setApiKey(apiKey);
      request.setAuthentication(auth);
      User user = new User();
