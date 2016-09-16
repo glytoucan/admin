@@ -457,15 +457,17 @@ public class UserProcedureRdf implements UserProcedure {
       hash = hash.trim();
       String username = contributorId.trim();
       
-      // if not email, convert
+      // if not email, be a nice guy and convert from contributor id
       UserDetailsRequest udRequest = new UserDetailsRequest();
       if (!username.contains("@")) {
-        udRequest.setPrimaryId(contributorId);
-        UserDetailsResponse udResponse = getDetails(udRequest);
-        User user = udResponse.getUser();
-        if (null == user || StringUtils.isBlank(user.getEmail()))
-          throw new UserException("username invalid");
-        username = user.getEmail();
+        List<SparqlEntity> list = getByContributorId(username);
+        for (SparqlEntity sparqlEntity : list) {
+          username = sparqlEntity.getValue("email");
+          if (StringUtils.isBlank(username))
+            continue;
+        }
+        if (StringUtils.isBlank(username))
+          throw new UserException("cannot retrieve primaryId from contributor" + contributorId);
       }
 
       SparqlEntity pmSE = new SparqlEntity(GLYTOUCAN_PROGRAM + determinePrimaryKey(username));

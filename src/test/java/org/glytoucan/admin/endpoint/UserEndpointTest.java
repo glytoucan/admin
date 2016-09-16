@@ -262,6 +262,31 @@ public class UserEndpointTest {
    
    @Test
    @Transactional
+   public void testUserKeyCheckRequestContributorDirect() {
+     UserKeyCheckRequest request = new UserKeyCheckRequest();
+     Authentication auth = new Authentication();
+     auth.setId("1");
+     auth.setApiKey(apiKey);
+     request.setAuthentication(auth);
+     request.setContributorId(adminEmail);
+     request.setApiKey(apiKey);
+     marshaller.setPackagesToScan(ClassUtils.getPackageName(UserKeyCheckRequest.class));
+
+     UserKeyCheckResponse result = userEndpoint.userKeyCheckRequest(request);
+//     Object wsResult = new WebServiceTemplate(marshaller).marshalSendAndReceive("http://localhost:"
+//         + port + "/ws", request);
+//     assertNotNull(wsResult);
+//     UserKeyCheckResponse result = (UserKeyCheckResponse)wsResult;
+     assertNotNull(result);
+     logger.debug(result);
+     logger.debug(result.getResponseMessage());
+     logger.debug(result.getResponseMessage().getTime());
+     Assert.assertEquals("0",result.getResponseMessage().getErrorCode());
+     Assert.assertTrue(result.isResult());
+   }
+   
+   @Test
+   @Transactional
    public void testGenerateHashDirect() {
      UserGenerateKeyRequest request = new UserGenerateKeyRequest();
      Authentication auth = new Authentication();
