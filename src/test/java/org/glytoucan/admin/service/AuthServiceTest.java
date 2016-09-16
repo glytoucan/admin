@@ -54,4 +54,20 @@ public class AuthServiceTest {
     Assert.assertNotNull(result);
     Assert.assertEquals(result.getErrorCode(), ErrorCode.AUTHENTICATION_SUCCESS.toString());
   }
+
+//@Test
+@Transactional
+public void testUserOAuth() throws UserException {
+  String id="aokinobu@gmail.com";
+  String token="ya29.CjFgA6aE5uZo3zf98k1PKF0uTp4TU2y9n7QveyqR2f9Med8Ma74xhjlGNV44ubN7fskJ";
+  
+  Authentication auth = new Authentication();
+  auth.setId(id);
+  auth.setApiKey(token);
+  
+  ResponseMessage result = authService.authenticate(auth);
+  Assert.assertNotNull(result);
+  Assert.assertEquals(ErrorCode.AUTHENTICATION_SUCCESS.toString(), result.getErrorCode());
+}
+
 }

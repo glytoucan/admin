@@ -73,7 +73,7 @@ public class AuthService {
   public ResponseMessage authenticate(Authentication auth) {
     System.out.println("user:>" + auth.getId());
     System.out.println("key:>" + auth.getApiKey());
-    String id = auth.getId();
+//    String id = auth.getId();
 
     ResponseMessage rm = new ResponseMessage();
     rm.setErrorCode(ErrorCode.AUTHENTICATION_SUCCESS.toString());
@@ -81,7 +81,7 @@ public class AuthService {
 //      if (StringUtils.contains(id, "@")) {
 //        id = userProcedure.getIdByEmail(id);
 //      }
-      if (!userProcedure.checkApiKey(id, auth.getApiKey())) {
+      if (!userProcedure.checkApiKey(auth.getId(), auth.getApiKey())) {
         DefaultOAuth2AccessToken defToken = new DefaultOAuth2AccessToken(auth.getApiKey());
         DefaultOAuth2ClientContext defaultContext = new DefaultOAuth2ClientContext();
         defaultContext.setAccessToken(defToken);
@@ -98,10 +98,10 @@ public class AuthService {
           rm.setMessage("oauth failed:>" + e.getMessage());
           return rm;
         }
-        String idFromEmail = userProcedure.getIdByEmail(user.getEmail());
-        if (!StringUtils.equals(idFromEmail, auth.getId())) {
+//        String idFromEmail = userProcedure.getIdByEmail(user.getEmail());
+        if (!StringUtils.equals(user.getEmail(), auth.getId())) {
           rm.setErrorCode(ErrorCode.AUTHENTICATION_FAILURE.toString());
-          rm.setMessage("id do not equal:>" + idFromEmail + "<> " + auth.getId());
+          rm.setMessage("id do not equal:>" + user.getEmail() + "<> " + auth.getId());
           return rm;
         }
       } else {
