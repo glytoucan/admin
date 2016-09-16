@@ -31,6 +31,7 @@ import org.glytoucan.admin.model.UserKeyRequest;
 import org.glytoucan.admin.model.UserKeyResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -447,29 +448,25 @@ public class UserProcedureRdf implements UserProcedure {
   }
 
   @Transactional
-  public boolean checkApiKey(String username, String hash) throws UserException {
+  public boolean checkApiKey(String contributorId, String hash) throws UserException {
     try {
-      if (StringUtils.isBlank(username) || StringUtils.isBlank(hash)) {
-        throw new UserException("username or hash cannot be blank");
+      if (StringUtils.isBlank(contributorId) || StringUtils.isBlank(hash)) {
+        throw new UserException("username or key cannot be blank");
       }
 
       hash = hash.trim();
-      username = username.trim();
-
-//      SparqlEntity sparqlEntityPerson = new SparqlEntity(determinePrimaryKey(username));
-////      sparqlEntityPerson.setValue(UserProcedureRdf.CONTRIBUTOR_ID, username);
-//      sparqlEntityPerson.setValue(UserProcedureRdf.MEMBER_OF, null);
-//      sparqlEntityPerson.setValue(Scintillate.NO_DOMAINS, SelectSparql.TRUE);
-//      selectScintPerson.update(sparqlEntityPerson);
-//
-//      List<SparqlEntity> results = sparqlDAO.query(selectScintPerson.getSparqlBean());
-//
-//      if (null == results || !results.iterator().hasNext())
-//        return false;
-//
-//      SparqlEntity se = results.iterator().next();
-//
-//      selectScintPerson.update(se);
+      String username = contributorId.trim();
+      
+      // if not email, convert
+      UserDetailsRequest udRequest = new UserDetailsRequest();
+      if (!username.contains("@")) {
+        udRequest.setPrimaryId(contributorId);
+        UserDetailsResponse udResponse = getDetails(udRequest);
+        User user = udResponse.getUser();
+        if (null == user || StringUtils.isBlank(user.getEmail()))
+          throw new UserException("username invalid");
+        username = user.getEmail();
+      }
 
       SparqlEntity pmSE = new SparqlEntity(GLYTOUCAN_PROGRAM + determinePrimaryKey(username));
       pmSE.setValue(UserProcedureRdf.MEMBER, selectScintPerson);
