@@ -44,7 +44,7 @@ public class UserProcedureRdf implements UserProcedure {
 
   Log logger = LogFactory.getLog(UserProcedureRdf.class);
 
-  String[] requiredFields = { "email", "givenName", "familyName", "verifiedEmail" };
+  String[] requiredFields = { "email", "givenName", "familyName", "verifiedEmail", UserProcedure.CONTRIBUTOR_ID };
 
   @Autowired
   SparqlDAO sparqlDAO;
@@ -109,6 +109,7 @@ public class UserProcedureRdf implements UserProcedure {
   // return scint;
   // }
 
+
   ClassHandler getOrganizationClassHandler() throws UserException {
     ClassHandler ch = new ClassHandler("schema", "http://schema.org/", "Organization");
     ch.setSparqlDAO(sparqlDAO);
@@ -132,11 +133,6 @@ public class UserProcedureRdf implements UserProcedure {
     String id = determinePrimaryKey(userSparqlEntity.getValue(UserProcedureRdf.EMAIL));
 
     SparqlEntity userdetails = getById(userSparqlEntity.getValue(UserProcedureRdf.EMAIL));
-
-    // if have email and contributor id, then mapping was complete.
-    if (null != userdetails && StringUtils.isNotBlank(userdetails.getValue(CONTRIBUTOR_ID))
-        && StringUtils.isNotBlank(userdetails.getValue(EMAIL)))
-      return;
 
     // get primary key from parameter (security)
     // String personUID = userSparqlEntity.getValue(SelectSparql.PRIMARY_KEY);
@@ -180,11 +176,12 @@ public class UserProcedureRdf implements UserProcedure {
     if (StringUtils.isBlank(userSparqlEntity.getValue(org.glytoucan.admin.service.UserProcedureRdf.EMAIL)))
       throw new UserException("email cannot be blank.  Please fix account information.");
 
-    if (StringUtils.isBlank(nameMap(sparqlentityPerson)))
-      throw new UserException("given name cannot be blank.  Please fix account information or login with google+.");
-
     // find external contributor id
     String contributorId = userSparqlEntity.getValue(UserProcedure.CONTRIBUTOR_ID);
+
+    if (StringUtils.isBlank(nameMap(sparqlentityPerson)) && !StringUtils.equals(contributorId, "1"))
+      throw new UserException("given name cannot be blank.  Please fix account information or login with google+.");
+
 
     // try {
     // contributorId =
@@ -198,7 +195,7 @@ public class UserProcedureRdf implements UserProcedure {
     try {
       // before insert, hash the id.
       sparqlentityPerson.setValue(SelectSparql.PRIMARY_KEY,
-          determinePrimaryKey(userSparqlEntity.getValue(UserProcedureRdf.EMAIL)));
+          id);
       insertScintPerson.update(sparqlentityPerson);
 
       sparqlDAO.insert(insertScintPerson.getSparqlBean());

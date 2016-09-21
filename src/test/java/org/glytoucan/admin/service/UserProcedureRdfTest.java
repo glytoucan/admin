@@ -1,12 +1,16 @@
 package org.glytoucan.admin.service;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.glycoinfo.rdf.DeleteSparqlBean;
 import org.glycoinfo.rdf.InsertSparql;
+import org.glycoinfo.rdf.InsertSparqlBean;
 import org.glycoinfo.rdf.SelectSparql;
+import org.glycoinfo.rdf.SelectSparqlBean;
 import org.glycoinfo.rdf.SparqlException;
 import org.glycoinfo.rdf.dao.SparqlDAO;
 import org.glycoinfo.rdf.dao.SparqlEntity;
@@ -17,6 +21,8 @@ import org.glycoinfo.rdf.scint.InsertScint;
 import org.glycoinfo.rdf.scint.Scintillate;
 import org.glycoinfo.rdf.scint.SelectScint;
 import org.glytoucan.admin.exception.UserException;
+import org.glytoucan.admin.model.UserDetailsRequest;
+import org.glytoucan.admin.model.UserDetailsResponse;
 import org.glytoucan.admin.model.UserKeyRequest;
 import org.glytoucan.admin.model.UserKeyResponse;
 import org.glytoucan.admin.service.UserProcedure;
@@ -265,14 +271,265 @@ public class UserProcedureRdfTest {
     Assert.assertTrue(userProcedure.checkApiKey(sePerson.getValue(UserProcedure.EMAIL), hash));
   }
 
+
+  @Test
+  @Transactional
+  public void testFixWeirdData() throws SparqlException, UserException {
+    
+//    prefix schema: <http://schema.org/> SELECT distinct count(?o) ?email  WHERE {
+//      ?uri schema:alternateName ?o .
+//      ?uri schema:email ?email .
+//      }    group by ?email
+
+//    prefix glytoucan: <http://www.glytoucan.org/glyco/owl/glytoucan#>
+//      SELECT *
+//       WHERE {
+//      GRAPH ?g {?o glytoucan:contributor <http://rdf.glycoinfo.org/glytoucan/contributor/userId/105>}} GROUP BY ?g
+//      limit 100
+    
+    // 5858, 5860, 5855
+    
+    DeleteSparqlBean dsb = new DeleteSparqlBean("prefix schema: <http://schema.org/>\n" + 
+        "DELETE WHERE { "
+        + "GRAPH <http://rdf.glytoucan.org/schema/users> {"
+            + "?users <http://schema.org/alternateName> \"5858\" . "
+            + "}"
+            + "}"
+        );
+
+    sparqlDAO.delete(dsb);
+
+    SelectSparqlBean ssb = new SelectSparqlBean("prefix schema: <http://schema.org/>\n" + 
+        "SELECT * FROM\n"
+        + "<http://rdf.glytoucan.org/schema/users>\n"
+        + "WHERE { "
+            + "?users <http://schema.org/alternateName> \"5858\" . "
+            + "}"
+        );
+
+    List<SparqlEntity> list = sparqlDAO.query(ssb);
+    Assert.assertEquals(0, list.size());
+
+    dsb = new DeleteSparqlBean("prefix schema: <http://schema.org/>\n" + 
+        "DELETE WHERE { "
+        + "GRAPH <http://rdf.glytoucan.org/schema/users> {"
+            + "?users <http://schema.org/alternateName> \"5860\" . "
+            + "}"
+            + "}"
+        );
+
+    sparqlDAO.delete(dsb);
+
+    ssb = new SelectSparqlBean("prefix schema: <http://schema.org/>\n" + 
+        "SELECT * FROM\n"
+        + "<http://rdf.glytoucan.org/schema/users>\n"
+        + "WHERE { "
+            + "?users <http://schema.org/alternateName> \"5860\" . "
+            + "}"
+        );
+
+    list = sparqlDAO.query(ssb);
+    Assert.assertEquals(0, list.size());
+
+    dsb = new DeleteSparqlBean("prefix schema: <http://schema.org/>\n" + 
+        "DELETE WHERE { "
+        + "GRAPH <http://rdf.glytoucan.org/schema/users> {"
+            + "?users <http://schema.org/alternateName> \"5855\" . "
+            + "}"
+            + "}"
+        );
+
+    sparqlDAO.delete(dsb);
+
+    ssb = new SelectSparqlBean("prefix schema: <http://schema.org/>\n" + 
+        "SELECT * FROM\n"
+        + "<http://rdf.glytoucan.org/schema/users>\n"
+        + "WHERE { "
+            + "?users <http://schema.org/alternateName> \"5855\" . "
+            + "}"
+        );
+    
+    list = sparqlDAO.query(ssb);
+    Assert.assertEquals(0, list.size());
+
+    //  update 5859 to 358
+
+    ssb = new SelectSparqlBean("prefix schema: <http://schema.org/>\n" + 
+        "SELECT ?users FROM\n"
+        + "<http://rdf.glytoucan.org/schema/users>\n"
+        + "WHERE { "
+            + "?users <http://schema.org/alternateName> \"5859\" . "
+            + "}"
+        );
+
+    sparqlDAO.query(ssb); 
+
+    dsb = new DeleteSparqlBean("prefix schema: <http://schema.org/>\n" + 
+        "DELETE WHERE { "
+        + "GRAPH <http://rdf.glytoucan.org/schema/users> {"
+            + "?users <http://schema.org/alternateName> \"5859\" . "
+            + "}"
+            + "}"
+        );
+
+    sparqlDAO.delete(dsb);
+
+    sparqlDAO.insert(new InsertSparqlBean("insert data { \n"
+        + "graph <http://rdf.glytoucan.org/schema/users> {\n"
+        + "<http://schema.org/Person#113380387314300017413> <http://schema.org/alternateName> \"358\" . \n"
+        + "}\n"
+        + "}"));
+    
+    
+    ssb = new SelectSparqlBean(" prefix schema: <http://schema.org/> SELECT distinct count(?o) ?email  WHERE {\n" + 
+        "  ?uri schema:alternateName ?o .\n" + 
+        "  ?uri schema:email ?email .\n" + 
+        "  }    group by ?email"
+        );
+    sparqlDAO.query(ssb);
+ 
+
+//    select *
+//    where {
+//    graph ?g{
+//    #?o glytoucan:contributor ?contributor .
+//    ?contributor a foaf:Person .
+//    ?contributor foaf:name ?name
+//    }}group by ?g limit 1000
+    
+  }
+  
+  @Test
+  @Transactional
+  public void testCleanupData() throws SparqlException, UserException {
+    
+//    prefix schema: <http://schema.org/> SELECT distinct count(?o) ?email  WHERE {
+//      ?uri schema:alternateName ?o .
+//      ?uri schema:email ?email .
+//      }    group by ?email
+
+//    prefix glytoucan: <http://www.glytoucan.org/glyco/owl/glytoucan#>
+//      SELECT *
+//       WHERE {
+//      GRAPH ?g {?o glytoucan:contributor <http://rdf.glycoinfo.org/glytoucan/contributor/userId/105>}} GROUP BY ?g
+//      limit 100
+    
+    // 5858, 5860, 5855
+    
+    DeleteSparqlBean dsb = new DeleteSparqlBean("prefix schema: <http://schema.org/>\n" + 
+        "DELETE WHERE { "
+        + "GRAPH <http://rdf.glytoucan.org/schema/users> {"
+            + "?users <http://schema.org/alternateName> \"5880\" . "
+            + "}"
+            + "}"
+        );
+
+    sparqlDAO.delete(dsb);
+
+    SelectSparqlBean ssb = new SelectSparqlBean("prefix schema: <http://schema.org/>\n" + 
+        "SELECT * FROM\n"
+        + "<http://rdf.glytoucan.org/schema/users>\n"
+        + "WHERE { "
+            + "?users <http://schema.org/alternateName> \"5880\" . "
+            + "}"
+        );
+
+    List<SparqlEntity> list = sparqlDAO.query(ssb);
+    Assert.assertEquals(0, list.size());
+
+    dsb = new DeleteSparqlBean("prefix schema: <http://schema.org/>\n" + 
+        "DELETE WHERE { "
+        + "GRAPH <http://rdf.glytoucan.org/schema/users> {"
+            + "?users <http://schema.org/alternateName> \"5882\" . "
+            + "}"
+            + "}"
+        );
+
+    sparqlDAO.delete(dsb);
+
+    ssb = new SelectSparqlBean("prefix schema: <http://schema.org/>\n" + 
+        "SELECT * FROM\n"
+        + "<http://rdf.glytoucan.org/schema/users>\n"
+        + "WHERE { "
+            + "?users <http://schema.org/alternateName> \"5882\" . "
+            + "}"
+        );
+
+    list = sparqlDAO.query(ssb);
+    Assert.assertEquals(0, list.size());
+    
+    dsb = new DeleteSparqlBean("prefix schema: <http://schema.org/>\n" + 
+        "DELETE WHERE { "
+        + "GRAPH <http://rdf.glytoucan.org/schema/users> {"
+            + "?users <http://schema.org/alternateName> \"5863\" . "
+            + "}"
+            + "}"
+        );
+
+    sparqlDAO.delete(dsb);
+
+    ssb = new SelectSparqlBean("prefix schema: <http://schema.org/>\n" + 
+        "SELECT * FROM\n"
+        + "<http://rdf.glytoucan.org/schema/users>\n"
+        + "WHERE { "
+            + "?users <http://schema.org/alternateName> \"5863\" . "
+            + "}"
+        );
+
+    list = sparqlDAO.query(ssb);
+    Assert.assertEquals(0, list.size());
+    
+//
+//    dsb = new DeleteSparqlBean("prefix schema: <http://schema.org/>\n" + 
+//        "DELETE WHERE { "
+//        + "GRAPH <http://rdf.glytoucan.org/schema/users> {"
+//            + "?users <http://schema.org/alternateName> \"5855\" . "
+//            + "}"
+//            + "}"
+//        );
+//
+//    sparqlDAO.delete(dsb);
+//
+//    ssb = new SelectSparqlBean("prefix schema: <http://schema.org/>\n" + 
+//        "SELECT * FROM\n"
+//        + "<http://rdf.glytoucan.org/schema/users>\n"
+//        + "WHERE { "
+//            + "?users <http://schema.org/alternateName> \"5855\" . "
+//            + "}"
+//        );
+//
+//    sparqlDAO.query(ssb);
+    
+    ssb = new SelectSparqlBean(" prefix schema: <http://schema.org/> SELECT distinct count(?o) ?email  WHERE {\n" + 
+        "  ?uri schema:alternateName ?o .\n" + 
+        "  ?uri schema:email ?email .\n" + 
+        "  }    group by ?email"
+        );
+    sparqlDAO.query(ssb);
+ 
+
+//    select *
+//    where {
+//    graph ?g{
+//    #?o glytoucan:contributor ?contributor .
+//    ?contributor a foaf:Person .
+//    ?contributor foaf:name ?name
+//    }}group by ?g limit 1000
+    
+  }
+      
   @Test
   @Transactional
   public void testConversionToEmail() throws SparqlException, UserException {
     
     // retrieve all persons emails
     SparqlEntity sparqlEntityPerson = new SparqlEntity();
-    sparqlEntityPerson.setValue("email", null);
-    sparqlEntityPerson.setValue(Scintillate.NO_DOMAINS, SelectSparql.TRUE);
+    sparqlEntityPerson.setValue(UserProcedure.EMAIL, null);
+//    sparqlEntityPerson.setValue(UserProcedure.GIVEN_NAME, null);
+//    sparqlEntityPerson.setValue(UserProcedure.FAMILY_NAME, null);
+//    sparqlEntityPerson.setValue(UserProcedure.VERIFIED_EMAIL, null);
+    sparqlEntityPerson.setValue(UserProcedure.CONTRIBUTOR_ID, null);
+//    sparqlEntityPerson.setValue(Scintillate.NO_DOMAINS, SelectSparql.TRUE);
 
     selectScintPerson.update(sparqlEntityPerson);
 
@@ -280,18 +537,28 @@ public class UserProcedureRdfTest {
     
     for (Iterator iterator = list.iterator(); iterator.hasNext();) {
       SparqlEntity sparqlEntity = (SparqlEntity) iterator.next();
-      logger.debug("email:>" + sparqlEntity.getValue("email"));
+      logger.debug("email:>" + sparqlEntity.getValue(UserProcedure.EMAIL));
       logger.debug("UserProcedure.CONTRIBUTOR_ID:>" + sparqlEntity.getValue(UserProcedure.CONTRIBUTOR_ID));
+      UserDetailsRequest request = new UserDetailsRequest();
+      request.setPrimaryId(sparqlEntity.getValue(UserProcedure.EMAIL));
+      UserDetailsResponse response = userProcedure.getDetails(request);
       
+      sparqlEntity.setValue(UserProcedure.VERIFIED_EMAIL, response.getUser().getEmailVerified());
+
       // convert the unique id
       userProcedure.add(sparqlEntity);
-      
-      // confirm the contributor id is the same
-      SparqlEntity sparqlEntityPersonConfirm = new SparqlEntity();
-      sparqlEntityPerson.setValue("email", null);
-      sparqlEntityPerson.setValue(Scintillate.NO_DOMAINS, SelectSparql.TRUE);
-    }
 
+      // confirm the contributor id is the same
+      sparqlEntity.setValue(UserProcedure.CONTRIBUTOR_ID, null);
+      sparqlEntity.setValue(Scintillate.NO_DOMAINS, SelectSparql.TRUE);
+      List<SparqlEntity> listConfirm = sparqlDAO.query((SelectSparql) selectScintPerson.getSparqlBean());
+      
+      for (SparqlEntity sparqlEntity2 : listConfirm) {
+        logger.debug("result email:>" + sparqlEntity2.getValue(UserProcedure.EMAIL));
+        logger.debug("result contributor:>" + sparqlEntity2.getValue(UserProcedure.CONTRIBUTOR_ID));
+      }
+    }
+    // passing old contributorid will retrieve latest hash
   }
   
   @Test
