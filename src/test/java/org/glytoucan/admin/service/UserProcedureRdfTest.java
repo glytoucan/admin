@@ -20,6 +20,7 @@ import org.glycoinfo.rdf.scint.DeleteScint;
 import org.glycoinfo.rdf.scint.InsertScint;
 import org.glycoinfo.rdf.scint.Scintillate;
 import org.glycoinfo.rdf.scint.SelectScint;
+import org.glycoinfo.rdf.utils.NumberGenerator;
 import org.glytoucan.admin.exception.UserException;
 import org.glytoucan.admin.model.UserDetailsRequest;
 import org.glytoucan.admin.model.UserDetailsResponse;
@@ -274,25 +275,18 @@ public class UserProcedureRdfTest {
 
   @Test
   @Transactional
-  public void testFixWeirdData() throws SparqlException, UserException {
-    
-//    prefix schema: <http://schema.org/> SELECT distinct count(?o) ?email  WHERE {
-//      ?uri schema:alternateName ?o .
-//      ?uri schema:email ?email .
-//      }    group by ?email
-
+  public void testConvertToHash() throws SparqlException, UserException {
 //    prefix glytoucan: <http://www.glytoucan.org/glyco/owl/glytoucan#>
-//      SELECT *
+//      SELECT distinct ?email
 //       WHERE {
-//      GRAPH ?g {?o glytoucan:contributor <http://rdf.glycoinfo.org/glytoucan/contributor/userId/105>}} GROUP BY ?g
-//      limit 100
+//      ?o <http://schema.org/email> ?email
+//  }
     
-    // 5858, 5860, 5855
-    
+    // delete all older alternatename
     DeleteSparqlBean dsb = new DeleteSparqlBean("prefix schema: <http://schema.org/>\n" + 
         "DELETE WHERE { "
         + "GRAPH <http://rdf.glytoucan.org/schema/users> {"
-            + "?users <http://schema.org/alternateName> \"5858\" . "
+            + "?users <http://schema.org/alternateName> ?old . "
             + "}"
             + "}"
         );
@@ -300,86 +294,26 @@ public class UserProcedureRdfTest {
     sparqlDAO.delete(dsb);
 
     SelectSparqlBean ssb = new SelectSparqlBean("prefix schema: <http://schema.org/>\n" + 
-        "SELECT * FROM\n"
+        "SELECT ?email FROM\n"
         + "<http://rdf.glytoucan.org/schema/users>\n"
         + "WHERE { "
-            + "?users <http://schema.org/alternateName> \"5858\" . "
-            + "}"
-        );
-
-    List<SparqlEntity> list = sparqlDAO.query(ssb);
-    Assert.assertEquals(0, list.size());
-
-    dsb = new DeleteSparqlBean("prefix schema: <http://schema.org/>\n" + 
-        "DELETE WHERE { "
-        + "GRAPH <http://rdf.glytoucan.org/schema/users> {"
-            + "?users <http://schema.org/alternateName> \"5860\" . "
-            + "}"
-            + "}"
-        );
-
-    sparqlDAO.delete(dsb);
-
-    ssb = new SelectSparqlBean("prefix schema: <http://schema.org/>\n" + 
-        "SELECT * FROM\n"
-        + "<http://rdf.glytoucan.org/schema/users>\n"
-        + "WHERE { "
-            + "?users <http://schema.org/alternateName> \"5860\" . "
-            + "}"
-        );
-
-    list = sparqlDAO.query(ssb);
-    Assert.assertEquals(0, list.size());
-
-    dsb = new DeleteSparqlBean("prefix schema: <http://schema.org/>\n" + 
-        "DELETE WHERE { "
-        + "GRAPH <http://rdf.glytoucan.org/schema/users> {"
-            + "?users <http://schema.org/alternateName> \"5855\" . "
-            + "}"
-            + "}"
-        );
-
-    sparqlDAO.delete(dsb);
-
-    ssb = new SelectSparqlBean("prefix schema: <http://schema.org/>\n" + 
-        "SELECT * FROM\n"
-        + "<http://rdf.glytoucan.org/schema/users>\n"
-        + "WHERE { "
-            + "?users <http://schema.org/alternateName> \"5855\" . "
+            + "?users <http://schema.org/email> ?email . "
             + "}"
         );
     
-    list = sparqlDAO.query(ssb);
-    Assert.assertEquals(0, list.size());
-
-    //  update 5859 to 358
-
-    ssb = new SelectSparqlBean("prefix schema: <http://schema.org/>\n" + 
-        "SELECT ?users FROM\n"
-        + "<http://rdf.glytoucan.org/schema/users>\n"
-        + "WHERE { "
-            + "?users <http://schema.org/alternateName> \"5859\" . "
-            + "}"
-        );
-
-    sparqlDAO.query(ssb); 
-
-    dsb = new DeleteSparqlBean("prefix schema: <http://schema.org/>\n" + 
-        "DELETE WHERE { "
-        + "GRAPH <http://rdf.glytoucan.org/schema/users> {"
-            + "?users <http://schema.org/alternateName> \"5859\" . "
-            + "}"
-            + "}"
-        );
-
-    sparqlDAO.delete(dsb);
-
-    sparqlDAO.insert(new InsertSparqlBean("insert data { \n"
-        + "graph <http://rdf.glytoucan.org/schema/users> {\n"
-        + "<http://schema.org/Person#113380387314300017413> <http://schema.org/alternateName> \"358\" . \n"
-        + "}\n"
-        + "}"));
+    List<SparqlEntity> results = sparqlDAO.query(ssb);
     
+    for (Iterator iterator = results.iterator(); iterator.hasNext();) {
+      SparqlEntity sparqlEntity = (SparqlEntity) iterator.next();
+      String email = sparqlEntity.getValue("email");
+      String hash = NumberGenerator.generateSHA256Hash(email);
+      sparqlDAO.insert(new InsertSparqlBean("insert data { \n"
+          + "graph <http://rdf.glytoucan.org/schema/users> {\n"
+          + "<http://schema.org/Person#" + hash + "> <http://schema.org/alternateName> \"" + hash + "\" . \n"
+          + "}\n"
+          + "}"));
+        
+    }
     
     ssb = new SelectSparqlBean(" prefix schema: <http://schema.org/> SELECT distinct count(?o) ?email  WHERE {\n" + 
         "  ?uri schema:alternateName ?o .\n" + 

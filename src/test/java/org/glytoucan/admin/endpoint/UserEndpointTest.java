@@ -207,7 +207,7 @@ public class UserEndpointTest {
      Assert.assertNotNull(result.getUser());
      Assert.assertEquals("glytoucan@gmail.com",result.getUser().getEmail());
      Assert.assertEquals("1",result.getUser().getExternalId());
-     Assert.assertEquals("Toucan",result.getUser().getFamilyName());
+     Assert.assertEquals("",result.getUser().getFamilyName());
    }
 
    @Test
