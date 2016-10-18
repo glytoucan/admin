@@ -206,7 +206,7 @@ public class UserEndpointTest {
      Assert.assertEquals("0",result.getResponseMessage().getErrorCode());
      Assert.assertNotNull(result.getUser());
      Assert.assertEquals("glytoucan@gmail.com",result.getUser().getEmail());
-     Assert.assertEquals("1",result.getUser().getExternalId());
+     Assert.assertEquals("815e7cbca52763e5c3fbb5a4dccc176479a50e2367f920843c4c35dca112e33d",result.getUser().getExternalId());
      Assert.assertEquals("",result.getUser().getFamilyName());
    }
 
@@ -265,7 +265,7 @@ public class UserEndpointTest {
    public void testUserKeyCheckRequestContributorDirect() {
      UserKeyCheckRequest request = new UserKeyCheckRequest();
      Authentication auth = new Authentication();
-     auth.setId("1");
+     auth.setId("815e7cbca52763e5c3fbb5a4dccc176479a50e2367f920843c4c35dca112e33d");
      auth.setApiKey(apiKey);
      request.setAuthentication(auth);
      request.setContributorId(adminEmail);

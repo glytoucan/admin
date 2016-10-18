@@ -179,7 +179,7 @@ public class UserProcedureRdf implements UserProcedure {
     // find external contributor id
     String contributorId = userSparqlEntity.getValue(UserProcedure.CONTRIBUTOR_ID);
 
-    if (StringUtils.isBlank(nameMap(sparqlentityPerson)) && !StringUtils.equals(contributorId, "1"))
+    if (StringUtils.isBlank(nameMap(sparqlentityPerson)) && !StringUtils.equals(contributorId, "815e7cbca52763e5c3fbb5a4dccc176479a50e2367f920843c4c35dca112e33d"))
       throw new UserException("given name cannot be blank.  Please fix account information or login with google+.");
 
 
@@ -318,7 +318,7 @@ public class UserProcedureRdf implements UserProcedure {
 
   private String nameMap(SparqlEntity sparqlEntity) {
     // the name map is the mapping of gmail address to contributor ID.
-    return sparqlEntity.getValue(org.glytoucan.admin.service.UserProcedureRdf.GIVEN_NAME);
+    return sparqlEntity.getValue(org.glytoucan.admin.service.UserProcedureRdf.GIVEN_NAME) + " " + sparqlEntity.getValue(FAMILY_NAME);
   }
 
   
@@ -581,6 +581,6 @@ public class UserProcedureRdf implements UserProcedure {
   }
   
   private String determinePrimaryKey(String email) {
-    return NumberGenerator.generateHash(email, new Date(0));
+    return NumberGenerator.generateSHA256Hash(email);
   }
 }
