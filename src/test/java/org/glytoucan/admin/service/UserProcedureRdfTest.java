@@ -453,7 +453,7 @@ public class UserProcedureRdfTest {
   }
       
   @Test
-//  @Transactional
+  @Transactional
   public void testConversionToEmail() throws SparqlException, UserException {
     
     // retrieve all persons emails
