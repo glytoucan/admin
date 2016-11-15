@@ -1,7 +1,7 @@
 version: '2'
 services:
   admin:
-    image: maven:3.3.9-jdk-8
+    image: maven:3.3.9-jdk-8-onbuild-alpine
     ports:
       - 8031:80
     volumes:
