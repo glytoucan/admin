@@ -3,10 +3,11 @@
 	<modelVersion>4.0.0</modelVersion>
 	<packaging>jar</packaging>
 	<artifactId>admin</artifactId>
+
 	<parent>
 		<groupId>org.glytoucan</groupId>
 		<artifactId>pom</artifactId>
-		<version>1.2.6.2-TOCO</version>
+		<version>1.2.7-TOCO-SNAPSHOT</version>
 	</parent>
 
 	<properties>
