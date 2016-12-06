@@ -96,8 +96,9 @@ public class UserEndpointTest {
 	
   String token="ya29.CjBXA4l-rJxxG7g2PpaTzo3061sa6KIlLzF6y-SX39VRQjKVRGaWcqoZkvxVb48FX6U";
 //  String apiKey = "JDUkMjAxNjA5MDUwOTM5MjMkVWZzaHNyRVFkMVl4Umx0MjJiczVyZFZVNDQ5bUJBVTBoQTdaeGpiUkRpMw==";
-  String apiKey = "JDUkMjAxNjA5MDUwOTM5MjMkVWZzaHNyRVFkMVl4Umx0MjJiczVyZFZVNDQ5bUJBVTBoQTdaeGpiUkRpMw==";
-  String adminEmail = "glytoucan@gmail.com";
+  String apiKey = "b83f8b8040a584579ab9bf784ef6275fe47b5694b1adeb82e076289bf17c2632";
+//  String adminEmail = "glytoucan@gmail.com";
+  String adminEmail = "815e7cbca52763e5c3fbb5a4dccc176479a50e2367f920843c4c35dca112e33d";
 
 	@Test
 	@Transactional
