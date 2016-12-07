@@ -94,7 +94,8 @@ public class UserEndpointTest {
     marshaller.afterPropertiesSet();
 	}
 	
-  String token="ya29.CjBXA4l-rJxxG7g2PpaTzo3061sa6KIlLzF6y-SX39VRQjKVRGaWcqoZkvxVb48FX6U";
+	String userEmail="aokinobu@gmail.com";
+  String token="ya29.GlytA_61fgAisbjaxC8RnpAZC36PMLJm69yC3adMTqDL_Tof6lwrpyudKiymhO0PlsBNXWvNJ-d9uyGToQ9Gn6srY-C4cdG-AEv3jWzRjcV92IXL9TSJqXQq8um6Zw";
 //  String apiKey = "JDUkMjAxNjA5MDUwOTM5MjMkVWZzaHNyRVFkMVl4Umx0MjJiczVyZFZVNDQ5bUJBVTBoQTdaeGpiUkRpMw==";
   String apiKey = "b83f8b8040a584579ab9bf784ef6275fe47b5694b1adeb82e076289bf17c2632";
 //  String adminEmail = "glytoucan@gmail.com";
@@ -253,6 +254,31 @@ public class UserEndpointTest {
 //         + port + "/ws", request);
 //     assertNotNull(wsResult);
 //     UserKeyCheckResponse result = (UserKeyCheckResponse)wsResult;
+     assertNotNull(result);
+     logger.debug(result);
+     logger.debug(result.getResponseMessage());
+     logger.debug(result.getResponseMessage().getTime());
+     Assert.assertEquals("0",result.getResponseMessage().getErrorCode());
+     Assert.assertTrue(result.isResult());
+   }
+   
+//   @Test
+   @Transactional
+   public void testUserKeyCheckRequestOAuth() {
+     UserKeyCheckRequest request = new UserKeyCheckRequest();
+     Authentication auth = new Authentication();
+     auth.setId(adminEmail);
+     auth.setApiKey(apiKey);
+     request.setAuthentication(auth);
+     request.setContributorId(userEmail);
+     request.setApiKey(token);
+     marshaller.setPackagesToScan(ClassUtils.getPackageName(UserKeyCheckRequest.class));
+
+     Object wsResult = new WebServiceTemplate(marshaller).marshalSendAndReceive("http://localhost:"
+         + port + "/ws", request);
+//     Object wsResult = new WebServiceTemplate(marshaller).marshalSendAndReceive("http://localhost:8031/ws", request);
+     assertNotNull(wsResult);
+     UserKeyCheckResponse result = (UserKeyCheckResponse)wsResult;
      assertNotNull(result);
      logger.debug(result);
      logger.debug(result.getResponseMessage());

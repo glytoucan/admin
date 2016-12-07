@@ -16,6 +16,7 @@ import org.glycoinfo.rdf.glycan.Saccharide;
 import org.glycoinfo.rdf.service.GlycanProcedure;
 import org.glycoinfo.rdf.service.exception.InvalidException;
 import org.glytoucan.admin.exception.UserException;
+import org.glytoucan.admin.model.Authentication;
 import org.glytoucan.admin.model.ErrorCode;
 import org.glytoucan.admin.model.ResponseMessage;
 import org.glytoucan.admin.model.User;
@@ -210,17 +211,25 @@ public class UserEndpoint {
 //      return res;
 //     }
     
-    try {
-      boolean result = userProcedure.checkApiKey(request.getContributorId(), request.getApiKey());
+//    try {
+      Authentication auth = new Authentication();
+      auth.setApiKey(request.getApiKey());
+      auth.setId(request.getContributorId());
+      rm = authService.authenticate(auth);
+      boolean result = rm.getErrorCode().equals(ErrorCode.AUTHENTICATION_SUCCESS.toString());
+//      boolean result = userProcedure.checkApiKey(request.getContributorId(), request.getApiKey());
+      
       res.setResult(result);
-    } catch (UserException e) {
-      // invalid data in se, return with errorcode.
-      rm.setMessage("Invalid Accession Number");
-      rm.setErrorCode("-100");
-      rm.setTime((new Date()).toString());
-      res.setResponseMessage(rm);
-      return res;
-    }
+//    } catch (UserException e) {
+//      // invalid data in se, return with errorcode.
+//      rm.setMessage("Invalid API Key");
+//      rm.setErrorCode("-100");
+//      rm.setTime((new Date()).toString());
+//      res.setResponseMessage(rm);
+//      return res;
+//    }
+    
+
 
     rm.setMessage("query result for:>" + request.getContributorId());
     rm.setErrorCode("0");

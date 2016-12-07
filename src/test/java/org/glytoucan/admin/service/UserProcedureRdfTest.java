@@ -452,7 +452,7 @@ public class UserProcedureRdfTest {
     
   }
       
-  @Test
+//  @Test
   @Transactional
   public void testConversionToEmail() throws SparqlException, UserException {
     
