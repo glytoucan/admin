@@ -287,6 +287,34 @@ public class UserEndpointTest {
      Assert.assertTrue(result.isResult());
    }
    
+   @Test   
+   @Transactional
+   public void testUserKeyCheckRequestSKN() {
+     UserKeyCheckRequest request = new UserKeyCheckRequest();
+     Authentication auth = new Authentication();
+     auth.setId(adminEmail);
+     auth.setApiKey(apiKey);
+     request.setAuthentication(auth);
+     request.setContributorId("dedee3c346471769aa57c2d018033a314e5173f052819eda3c7872722b9c0f7b");
+     request.setApiKey("cdacda16afb267613d6eda95ca981b4be93e4870f6e077b98f07582547c2648b");
+//     cdacda16afb267613d6eda95ca981b4be93e4870f6e077b98f07582547c2648b
+//     ca57631ea128dec137bd1c87070280888f0190b3c6eab92cab18b2cc691fd36d
+     marshaller.setPackagesToScan(ClassUtils.getPackageName(UserKeyCheckRequest.class));
+
+     Object wsResult = new WebServiceTemplate(marshaller).marshalSendAndReceive("http://localhost:" + port + "/ws", request);
+//     Object wsResult = new WebServiceTemplate(marshaller).marshalSendAndReceive("http://glytoucan.org:8031/ws", request);
+     
+//     Object wsResult = new WebServiceTemplate(marshaller).marshalSendAndReceive("http://localhost:8031/ws", request);
+     assertNotNull(wsResult);
+     UserKeyCheckResponse result = (UserKeyCheckResponse)wsResult;
+     assertNotNull(result);
+     logger.debug(result);
+     logger.debug(result.getResponseMessage());
+     logger.debug(result.getResponseMessage().getTime());
+     Assert.assertEquals("0",result.getResponseMessage().getErrorCode());
+     Assert.assertTrue(result.isResult());
+   }
+   
    @Test
    @Transactional
    public void testUserKeyCheckRequestContributorDirect() {
