@@ -1,0 +1,12 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+	xmlns:admin="http://model.admin.glytoucan.org/">
+	<soapenv:Header />
+	<soapenv:Body>
+		<admin:userDetailsRequest>
+      <admin:authentication><admin:id>1</admin:id><admin:apiKey>JDUkMjAxNjA5MDgwOTQ0MjMkN0M3WDNIRnBTTmlPeFJndTBiUWRQQ3FEMmVqWVZpWDY3TGNJLi5tQWxFNw==</admin:apiKey></admin:authentication>
+			<admin:primaryId>1</admin:primaryId>
+		</admin:userDetailsRequest>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+

@@ -1,0 +1,9 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+	xmlns:gtc="http://soap.api.glytoucan.org/">
+	<soapenv:Header />
+	<soapenv:Body>
+		<gtc:glycoSequenceDetailRequest>
+			<gtc:accessionNumber>G00055MO</gtc:accessionNumber>
+		</gtc:glycoSequenceDetailRequest>
+	</soapenv:Body>
+</soapenv:Envelope>
