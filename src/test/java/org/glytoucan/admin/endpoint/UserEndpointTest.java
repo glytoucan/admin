@@ -31,6 +31,7 @@ import org.glytoucan.admin.model.UserKeyCheckRequest;
 import org.glytoucan.admin.model.UserKeyCheckResponse;
 import org.glytoucan.admin.model.UserKeyRequest;
 import org.glytoucan.admin.model.UserKeyResponse;
+import org.glytoucan.admin.model.UserRegisterCoreRequest;
 import org.glytoucan.admin.model.UserRegisterRequest;
 import org.glytoucan.admin.model.UserRegisterResponse;
 import org.junit.Assert;
@@ -477,5 +478,30 @@ public class UserEndpointTest {
      Assert.assertEquals(user.getGivenName(), result.getUser().getGivenName());
      Assert.assertEquals(user.getExternalId(), result.getUser().getExternalId());
      Assert.assertEquals(user.getEmailVerified(), result.getUser().getEmailVerified());
+   }
+   
+   @Test
+   @Transactional
+   public void testUserAddJustEmailName() {
+     UserRegisterCoreRequest request = new UserRegisterCoreRequest();
+     Authentication auth = new Authentication();
+     auth.setId(adminEmail);
+     auth.setApiKey(apiKey);
+     request.setAuthentication(auth);
+     User user = new User();
+     user.setEmail("testglytoucan2@gmail.com");
+     request.setUser(user);
+
+//     UserRegisterResponse result = userEndpoint.register(request);
+    Object wsResult = new WebServiceTemplate(marshaller).marshalSendAndReceive("http://localhost:"
+         + port + "/ws", request);
+     assertNotNull(wsResult);
+     UserRegisterResponse result = (UserRegisterResponse)wsResult;
+     assertNotNull(result);
+     logger.debug(result);
+     logger.debug(result.getResponseMessage());
+     logger.debug(result.getResponseMessage().getTime());
+     Assert.assertEquals("0",result.getResponseMessage().getErrorCode());
+     Assert.assertEquals(user.getEmail(), result.getUser().getEmail());
    }
 }

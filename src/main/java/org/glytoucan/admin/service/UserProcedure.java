@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.glycoinfo.rdf.dao.SparqlEntity;
 import org.glytoucan.admin.exception.UserException;
+import org.glytoucan.admin.model.UserCoreRequest;
 import org.glytoucan.admin.model.UserDetailsRequest;
 import org.glytoucan.admin.model.UserDetailsResponse;
 import org.glytoucan.admin.model.UserKeyRequest;
@@ -15,6 +16,7 @@ import org.glytoucan.admin.model.UserKeyResponse;
  *
  */
 public interface UserProcedure {
+    public static final String NAME = "name";
 	public static final String GIVEN_NAME = "givenName";
 	public static final String ID = "id";
 	public static final String FAMILY_NAME = "familyName";
@@ -56,5 +58,9 @@ public interface UserProcedure {
 	boolean checkApiKey(String username, String hash) throws UserException;
 
   public UserDetailsResponse getDetails(UserDetailsRequest request) throws UserException;
+  
+  public void addCore(SparqlEntity userSparqlEntity) throws UserException;
+
+public UserDetailsResponse getCore(UserCoreRequest request) throws UserException;
 
 }

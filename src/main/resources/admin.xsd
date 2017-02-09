@@ -58,6 +58,15 @@
 		</xs:complexType>
 	</xs:element>
 
+	<xs:element name="userCoreRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="authentication" type="admin:authentication" />
+				<xs:element name="email" type="xs:string" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
 	<xs:element name="userDetailsResponse">
 		<xs:complexType>
 			<xs:sequence>
@@ -87,6 +96,15 @@
 	</xs:element>
 
 	<xs:element name="userRegisterRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="authentication" type="admin:authentication" />
+				<xs:element name="user" type="admin:user" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="userRegisterCoreRequest">
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element name="authentication" type="admin:authentication" />
