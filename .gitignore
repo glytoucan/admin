@@ -5,3 +5,4 @@ bin
 target
 pom.xml.versionsBackup
 admin.log
+src/main/resources/logback.xml
