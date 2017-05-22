@@ -45,7 +45,7 @@
 		<dependency>
 			<groupId>org.glycoinfo</groupId>
 			<artifactId>batch</artifactId>
-			<version>0.3.7-SNAPSHOT</version>
+			<version>0.3.9-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<groupId>jp.bluetree.log</groupId>

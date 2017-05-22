@@ -51,7 +51,7 @@ public interface UserProcedure {
 	
 	public String generateHash(String primaryId) throws UserException;
 
-	public List<SparqlEntity> getAll() throws UserException;
+	public String getAllClass(String graph, String prefix, String prefixUri, String classname, String predicate, String limit, String offset, String delimter) throws UserException;
 
 	public List<SparqlEntity> getByContributorId(String username) throws UserException;
 

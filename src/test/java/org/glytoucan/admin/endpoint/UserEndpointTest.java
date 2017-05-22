@@ -20,6 +20,8 @@ import org.glycoinfo.rdf.SparqlException;
 import org.glycoinfo.rdf.service.GlycanProcedure;
 import org.glytoucan.admin.Application;
 import org.glytoucan.admin.model.Authentication;
+import org.glytoucan.admin.model.ClassListRequest;
+import org.glytoucan.admin.model.ClassListResponse;
 import org.glytoucan.admin.model.ErrorCode;
 import org.glytoucan.admin.model.User;
 import org.glytoucan.admin.model.Authentication;
@@ -98,9 +100,11 @@ public class UserEndpointTest {
 	String userEmail="aokinobu@gmail.com";
   String token="ya29.GlytA_61fgAisbjaxC8RnpAZC36PMLJm69yC3adMTqDL_Tof6lwrpyudKiymhO0PlsBNXWvNJ-d9uyGToQ9Gn6srY-C4cdG-AEv3jWzRjcV92IXL9TSJqXQq8um6Zw";
 //  String apiKey = "JDUkMjAxNjA5MDUwOTM5MjMkVWZzaHNyRVFkMVl4Umx0MjJiczVyZFZVNDQ5bUJBVTBoQTdaeGpiUkRpMw==";
-  String apiKey = "b83f8b8040a584579ab9bf784ef6275fe47b5694b1adeb82e076289bf17c2632";
+//  String apiKey = "b83f8b8040a584579ab9bf784ef6275fe47b5694b1adeb82e076289bf17c2632";
+  String apiKey = "4da304929bdc1b533a514f5b45e0efc65fdfc7cc20639a3ccab55a1b5fa93d95";
 //  String adminEmail = "glytoucan@gmail.com";
-  String adminEmail = "815e7cbca52763e5c3fbb5a4dccc176479a50e2367f920843c4c35dca112e33d";
+//  String adminEmail = "815e7cbca52763e5c3fbb5a4dccc176479a50e2367f920843c4c35dca112e33d";
+  String adminEmail = "glycodm@gmail.com";
 
 	@Test
 	@Transactional
@@ -503,5 +507,38 @@ public class UserEndpointTest {
      logger.debug(result.getResponseMessage().getTime());
      Assert.assertEquals("0",result.getResponseMessage().getErrorCode());
      Assert.assertEquals(user.getEmail(), result.getUser().getEmail());
+   }
+   
+   
+   @Test
+   @Transactional
+   public void testClassList() {
+     ClassListRequest request = new ClassListRequest();
+     Authentication auth = new Authentication();
+     auth.setId(adminEmail);
+     auth.setApiKey(apiKey);
+     request.setAuthentication(auth);
+
+     request.setGraph("http://schema.org");
+     request.setClassname("Person");
+     request.setDelimiter(" ");
+     request.setGraph("http://rdf.glytoucan.org/schema/users");
+     request.setPrefix("schema");
+     request.setPrefixUri("http://schema.org/");
+     request.setPredicate("email");
+     request.setOffset("1");
+     request.setLimit("10");
+
+//     UserRegisterResponse result = userEndpoint.register(request);
+    Object wsResult = new WebServiceTemplate(marshaller).marshalSendAndReceive("http://localhost:"
+         + port + "/ws", request);
+     assertNotNull(wsResult);
+     ClassListResponse result = (ClassListResponse)wsResult;
+     assertNotNull(result);
+     logger.debug(result);
+     logger.debug(result.getResponseMessage());
+     logger.debug(result.getResponseMessage().getTime());
+     Assert.assertEquals("0",result.getResponseMessage().getErrorCode());
+     Assert.assertEquals("glytoucan@gmail.com sparqlite@gmail.com aokinobu@gmail.com", result.getResults());
    }
 }

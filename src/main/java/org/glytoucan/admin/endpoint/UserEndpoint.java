@@ -17,6 +17,8 @@ import org.glycoinfo.rdf.service.GlycanProcedure;
 import org.glycoinfo.rdf.service.exception.InvalidException;
 import org.glytoucan.admin.exception.UserException;
 import org.glytoucan.admin.model.Authentication;
+import org.glytoucan.admin.model.ClassListRequest;
+import org.glytoucan.admin.model.ClassListResponse;
 import org.glytoucan.admin.model.ErrorCode;
 import org.glytoucan.admin.model.ResponseMessage;
 import org.glytoucan.admin.model.User;
@@ -420,6 +422,47 @@ public class UserEndpoint {
     res.setResponseMessage(rm);
     res.setUser(user);
     
+    return res;
+  }
+  
+  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "classListRequest")
+  @Transactional
+  @ResponsePayload
+  public ClassListResponse classListRequest(@RequestPayload ClassListRequest request) {
+    Assert.notNull(request);
+    Assert.notNull(request.getAuthentication());
+    Assert.notNull(request.getClassname());
+    Assert.notNull(request.getPrefix());
+    Assert.notNull(request.getPrefixUri());
+    Assert.notNull(request.getPredicate());
+
+    ClassListResponse res = new ClassListResponse();
+
+    ResponseMessage rm = new ResponseMessage();
+    rm = authService.authenticate(request.getAuthentication());
+    if (rm.getErrorCode().equals(ErrorCode.AUTHENTICATION_FAILURE.toString())) {
+      rm.setTime((new Date()).toString());
+      res.setResponseMessage(rm);
+      return res;
+    }
+    rm.setTime((new Date()).toString());
+
+    try {
+      String result = userProcedure.getAllClass(request.getGraph(), request.getPrefix(), request.getPrefixUri(),
+          request.getClassname(), request.getPredicate(), request.getLimit(), request.getOffset(),
+          request.getDelimiter());
+      rm.setMessage("result for " + request.getClassname());
+      rm.setErrorCode("0");
+      res.setResponseMessage(rm);
+      res.setResults(result);
+    } catch (UserException e) {
+      // invalid data in se, return with errorcode.
+      rm.setMessage("User Exception:" + e.getMessage());
+      rm.setErrorCode(ErrorCode.INVALID_PARAMETERS.toString());
+      rm.setTime((new Date()).toString());
+      res.setResponseMessage(rm);
+    }
+
     return res;
   }
 }

@@ -10,6 +10,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.glycoinfo.rdf.SelectSparql;
+import org.glycoinfo.rdf.SelectSparqlBean;
+import org.glycoinfo.rdf.SparqlBean;
 import org.glycoinfo.rdf.SparqlException;
 import org.glycoinfo.rdf.dao.SparqlDAO;
 import org.glycoinfo.rdf.dao.SparqlEntity;
@@ -54,6 +56,10 @@ Log logger = LogFactory.getLog(UserProcedureRdf.class);
   @Autowired
   @Qualifier(value = "selectscintperson")
   SelectScint selectScintPerson;
+  
+  @Autowired
+  @Qualifier(value = "selectclasslist")
+  SelectScint selectClassList;
 
   @Autowired
   @Qualifier(value = "insertscintperson")
@@ -465,14 +471,51 @@ Log logger = LogFactory.getLog(UserProcedureRdf.class);
   }
 
   @Transactional
-  public List<SparqlEntity> getAll() throws UserException {
+  public List<SparqlEntity> getAll(String offset, String limit) throws UserException {
     try {
-      return sparqlDAO.query(selectScintPerson.getSparqlBean());
+    	SelectSparql select = selectScintPerson.getSparqlBean();
+    	select.setOffset(offset);
+    	select.setLimit(limit);
+      return sparqlDAO.query(select);
     } catch (SparqlException e) {
       throw new UserException(e);
     }
   }
+  
 
+  @Transactional
+  public String getAllClass(String graph, String prefix, String prefixUri, String classname, String predicate, String limit,
+      String offset, String delimiter) throws UserException {
+    SelectScint select = selectClassList;
+    selectClassList.setPrefix(prefix);
+    selectClassList.setPrefixIri(prefixUri);
+    selectClassList.setClassName(classname);
+    try {
+      select.update();
+      SelectSparql sparql = select.getSparqlBean();
+      
+      sparql.setOffset(offset);
+      sparql.setLimit(limit);
+      
+      final SparqlEntity sparqlentity = new SparqlEntity();
+      sparqlentity.setValue(predicate, null);
+      sparql.setSparqlEntity(sparqlentity);
+
+      
+      List<SparqlEntity> results = sparqlDAO.query(sparql);
+
+      StringBuilder sb = new StringBuilder();
+      for (Iterator iterator = results.iterator(); iterator.hasNext();) {
+        SparqlEntity sparqlEntity = (SparqlEntity) iterator.next();
+        sb.append(sparqlEntity.getValue(predicate));
+        if (iterator.hasNext())
+          sb.append(delimiter);
+      }
+      return sb.toString();
+    } catch (SparqlException e) {
+      throw new UserException(e);
+    }
+  }
 
   @Transactional
   public List<SparqlEntity> getByContributorId(String username) throws UserException {
