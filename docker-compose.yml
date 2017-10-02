@@ -7,7 +7,7 @@ services:
       - 8031:80
     volumes:
       - ${HOME}/glytoucan/maven:/root/.m2
-      - ${WORKSPACE_PARENT}/${WORKSPACE}/coreauth:/workspace
+      - ${WORKSPACE_PARENT}/${WORKSPACE}/${PROJECT}:/workspace
       - /etc/localtime:/etc/localtime
     working_dir: /workspace/admin
     command: mvn -U -DskipTests=true spring-boot:run ${SPRING_PROFILE}
