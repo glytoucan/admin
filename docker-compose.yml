@@ -6,7 +6,7 @@ services:
     ports:
       - 8031:80
     volumes:
-      - ${OPT}/core/maven:/root/.m2
+      - ${HOME}/glytoucan/maven:/root/.m2
       - ${WORKSPACE_PARENT}/${WORKSPACE}/coreauth:/workspace
       - /etc/localtime:/etc/localtime
     working_dir: /workspace/admin
