@@ -58,6 +58,15 @@
 		</xs:complexType>
 	</xs:element>
 
+	<xs:element name="userCoreRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="authentication" type="admin:authentication" />
+				<xs:element name="email" type="xs:string" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
 	<xs:element name="userDetailsResponse">
 		<xs:complexType>
 			<xs:sequence>
@@ -95,6 +104,15 @@
 		</xs:complexType>
 	</xs:element>
 
+	<xs:element name="userRegisterCoreRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="authentication" type="admin:authentication" />
+				<xs:element name="user" type="admin:user" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
 	<xs:element name="userRegisterResponse">
 		<xs:complexType>
 			<xs:sequence>
@@ -118,6 +136,32 @@
 			<xs:sequence>
 				<xs:element name="primaryId" type="xs:string" />
 				<xs:element name="key" type="xs:string" />
+				<xs:element name="responseMessage" type="admin:responseMessage" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="classListRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="authentication" type="admin:authentication" />
+
+				<xs:element name="graph" type="xs:string" />
+				<xs:element name="prefix" type="xs:string" />
+				<xs:element name="prefixUri" type="xs:string" />
+				<xs:element name="classname" type="xs:string" />
+				<xs:element name="predicate" type="xs:string" />
+				<xs:element name="offset" type="xs:string" />
+				<xs:element name="limit" type="xs:string" />
+				<xs:element name="delimiter" type="xs:string" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="classListResponse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="results" type="xs:string" />
 				<xs:element name="responseMessage" type="admin:responseMessage" />
 			</xs:sequence>
 		</xs:complexType>

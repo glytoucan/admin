@@ -1,8 +1,7 @@
 version: '2'
 services:
   admin:
-    image: registry.bluetree.jp/aoki/core/admin:0.01
-    build: .
+    image: maven:3.3.9-jdk-8-onbuild-alpine
     ports:
       - 8031:80
     volumes:

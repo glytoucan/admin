@@ -451,7 +451,7 @@ public class UserProcedureRdfTest {
     
   }
       
-  @Test
+//  @Test
   @Transactional
   public void testConversionToEmail() throws SparqlException, UserException {
     
@@ -461,7 +461,7 @@ public class UserProcedureRdfTest {
 //    sparqlEntityPerson.setValue(UserProcedure.GIVEN_NAME, null);
 //    sparqlEntityPerson.setValue(UserProcedure.FAMILY_NAME, null);
 //    sparqlEntityPerson.setValue(UserProcedure.VERIFIED_EMAIL, null);
-    sparqlEntityPerson.setValue(UserProcedure.CONTRIBUTOR_ID, null);
+//    sparqlEntityPerson.setValue(UserProcedure.CONTRIBUTOR_ID, null);
 //    sparqlEntityPerson.setValue(Scintillate.NO_DOMAINS, SelectSparql.TRUE);
 
     selectScintPerson.update(sparqlEntityPerson);
@@ -471,11 +471,14 @@ public class UserProcedureRdfTest {
     for (Iterator iterator = list.iterator(); iterator.hasNext();) {
       SparqlEntity sparqlEntity = (SparqlEntity) iterator.next();
       logger.debug("email:>" + sparqlEntity.getValue(UserProcedure.EMAIL));
-      logger.debug("UserProcedure.CONTRIBUTOR_ID:>" + sparqlEntity.getValue(UserProcedure.CONTRIBUTOR_ID));
+      logger.debug("old UserProcedure.CONTRIBUTOR_ID:>" + sparqlEntity.getValue(UserProcedure.CONTRIBUTOR_ID));
       UserDetailsRequest request = new UserDetailsRequest();
       request.setPrimaryId(sparqlEntity.getValue(UserProcedure.EMAIL));
       UserDetailsResponse response = userProcedure.getDetails(request);
       
+      sparqlEntity.setValue(UserProcedure.CONTRIBUTOR_ID, NumberGenerator.generateSHA256Hash(sparqlEntity.getValue(UserProcedure.EMAIL)));
+      logger.debug("UserProcedure.CONTRIBUTOR_ID:>" + sparqlEntity.getValue(UserProcedure.CONTRIBUTOR_ID));
+
       sparqlEntity.setValue(UserProcedure.VERIFIED_EMAIL, response.getUser().getEmailVerified());
 
       // convert the unique id

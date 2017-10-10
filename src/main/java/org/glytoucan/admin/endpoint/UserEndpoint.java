@@ -16,9 +16,13 @@ import org.glycoinfo.rdf.glycan.Saccharide;
 import org.glycoinfo.rdf.service.GlycanProcedure;
 import org.glycoinfo.rdf.service.exception.InvalidException;
 import org.glytoucan.admin.exception.UserException;
+import org.glytoucan.admin.model.Authentication;
+import org.glytoucan.admin.model.ClassListRequest;
+import org.glytoucan.admin.model.ClassListResponse;
 import org.glytoucan.admin.model.ErrorCode;
 import org.glytoucan.admin.model.ResponseMessage;
 import org.glytoucan.admin.model.User;
+import org.glytoucan.admin.model.UserCoreRequest;
 import org.glytoucan.admin.model.UserDetailsRequest;
 import org.glytoucan.admin.model.UserDetailsResponse;
 import org.glytoucan.admin.model.UserGenerateKeyRequest;
@@ -27,6 +31,7 @@ import org.glytoucan.admin.model.UserKeyCheckRequest;
 import org.glytoucan.admin.model.UserKeyCheckResponse;
 import org.glytoucan.admin.model.UserKeyRequest;
 import org.glytoucan.admin.model.UserKeyResponse;
+import org.glytoucan.admin.model.UserRegisterCoreRequest;
 import org.glytoucan.admin.model.UserRegisterRequest;
 import org.glytoucan.admin.model.UserRegisterResponse;
 import org.glytoucan.admin.service.AuthService;
@@ -159,6 +164,51 @@ public class UserEndpoint {
     res.setResponseMessage(rm);
     return res;
   }
+  
+  /**
+   * 
+   * Query User Core using primaryId.
+   * 
+   * @param accessionNumber
+   * @return
+   */
+  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "userCoreRequest")
+  @ResponsePayload
+  @Transactional
+  public UserDetailsResponse userCoreRequest(@RequestPayload UserCoreRequest request) {
+    Assert.notNull(request);
+    Assert.notNull(request.getAuthentication());
+    Assert.notNull(request.getEmail());
+
+    UserDetailsResponse res = new UserDetailsResponse();
+
+    ResponseMessage rm = new ResponseMessage();
+    rm = authService.authenticate(request.getAuthentication());
+    if (rm.getErrorCode().equals(ErrorCode.AUTHENTICATION_FAILURE.toString())) {
+      rm.setTime((new Date()).toString());
+      res.setResponseMessage(rm);
+      return res;
+    }
+    rm.setTime((new Date()).toString());
+
+    SparqlEntity se = null;
+    try {
+      res = userProcedure.getCore(request);
+    } catch (UserException e) {
+      // invalid data in se, return with errorcode.
+      rm.setMessage("Invalid Accession Number");
+      rm.setErrorCode("-100");
+      rm.setTime((new Date()).toString());
+      res.setResponseMessage(rm);
+      return res;
+    }
+
+    rm.setMessage("query result for:>" + request.getEmail());
+    rm.setErrorCode("0");
+
+    res.setResponseMessage(rm);
+    return res;
+  }
  
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "userKeyCheckRequest")
   @ResponsePayload
@@ -210,17 +260,25 @@ public class UserEndpoint {
 //      return res;
 //     }
     
-    try {
-      boolean result = userProcedure.checkApiKey(request.getContributorId(), request.getApiKey());
+//    try {
+      Authentication auth = new Authentication();
+      auth.setApiKey(request.getApiKey());
+      auth.setId(request.getContributorId());
+      rm = authService.authenticate(auth);
+      boolean result = rm.getErrorCode().equals(ErrorCode.AUTHENTICATION_SUCCESS.toString());
+//      boolean result = userProcedure.checkApiKey(request.getContributorId(), request.getApiKey());
+      
       res.setResult(result);
-    } catch (UserException e) {
-      // invalid data in se, return with errorcode.
-      rm.setMessage("Invalid Accession Number");
-      rm.setErrorCode("-100");
-      rm.setTime((new Date()).toString());
-      res.setResponseMessage(rm);
-      return res;
-    }
+//    } catch (UserException e) {
+//      // invalid data in se, return with errorcode.
+//      rm.setMessage("Invalid API Key");
+//      rm.setErrorCode("-100");
+//      rm.setTime((new Date()).toString());
+//      res.setResponseMessage(rm);
+//      return res;
+//    }
+    
+
 
     rm.setMessage("query result for:>" + request.getContributorId());
     rm.setErrorCode("0");
@@ -316,6 +374,95 @@ public class UserEndpoint {
     res.setResponseMessage(rm);
     res.setUser(user);
     
+    return res;
+  }
+  
+  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "userRegisterCoreRequest")
+  @Transactional
+  @ResponsePayload
+  public UserRegisterResponse userRegisterRequest(@RequestPayload UserRegisterCoreRequest request) {
+    Assert.notNull(request);
+    Assert.notNull(request.getAuthentication());
+    Assert.notNull(request.getUser());
+
+    User user = request.getUser();
+    UserRegisterResponse res = new UserRegisterResponse();
+
+    ResponseMessage rm = new ResponseMessage();
+    rm = authService.authenticate(request.getAuthentication());
+    if (rm.getErrorCode().equals(ErrorCode.AUTHENTICATION_FAILURE.toString())) {
+      rm.setTime((new Date()).toString());
+      res.setResponseMessage(rm);
+      return res;
+    }
+    rm.setTime((new Date()).toString());
+
+    SparqlEntity se = new SparqlEntity();
+    se.setValue(UserProcedure.EMAIL, user.getEmail());
+    
+    try {
+      userProcedure.addCore(se);
+    } catch (UserException e) {
+      // invalid data in se, return with errorcode.
+      rm.setMessage("User Exception:" + e.getMessage());
+      rm.setErrorCode(ErrorCode.INVALID_PARAMETERS.toString());
+      rm.setTime((new Date()).toString());
+      res.setResponseMessage(rm);
+      return res;
+    }
+    
+    UserCoreRequest udr = new UserCoreRequest();
+    udr.setAuthentication(request.getAuthentication());
+    udr.setEmail(user.getEmail());
+    UserDetailsResponse response = userCoreRequest(udr);
+    user = response.getUser();
+    
+    rm.setMessage("User generated for " + user.getGivenName());
+    rm.setErrorCode("0");
+    res.setResponseMessage(rm);
+    res.setUser(user);
+    
+    return res;
+  }
+  
+  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "classListRequest")
+  @Transactional
+  @ResponsePayload
+  public ClassListResponse classListRequest(@RequestPayload ClassListRequest request) {
+    Assert.notNull(request);
+    Assert.notNull(request.getAuthentication());
+    Assert.notNull(request.getClassname());
+    Assert.notNull(request.getPrefix());
+    Assert.notNull(request.getPrefixUri());
+    Assert.notNull(request.getPredicate());
+
+    ClassListResponse res = new ClassListResponse();
+
+    ResponseMessage rm = new ResponseMessage();
+    rm = authService.authenticate(request.getAuthentication());
+    if (rm.getErrorCode().equals(ErrorCode.AUTHENTICATION_FAILURE.toString())) {
+      rm.setTime((new Date()).toString());
+      res.setResponseMessage(rm);
+      return res;
+    }
+    rm.setTime((new Date()).toString());
+
+    try {
+      String result = userProcedure.getAllClass(request.getGraph(), request.getPrefix(), request.getPrefixUri(),
+          request.getClassname(), request.getPredicate(), request.getLimit(), request.getOffset(),
+          request.getDelimiter());
+      rm.setMessage("result for " + request.getClassname());
+      rm.setErrorCode("0");
+      res.setResponseMessage(rm);
+      res.setResults(result);
+    } catch (UserException e) {
+      // invalid data in se, return with errorcode.
+      rm.setMessage("User Exception:" + e.getMessage());
+      rm.setErrorCode(ErrorCode.INVALID_PARAMETERS.toString());
+      rm.setTime((new Date()).toString());
+      res.setResponseMessage(rm);
+    }
+
     return res;
   }
 }

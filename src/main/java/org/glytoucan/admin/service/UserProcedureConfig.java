@@ -14,6 +14,12 @@ public class UserProcedureConfig implements GraphConfig {
 	
 	public static final String graphUser = graph + "/schema/users";
 	
+	 @Bean(name = "selectclasslist")
+	  SelectScint getSelectClassList() throws SparqlException {
+	    SelectScint select = new SelectScint("schema", "http://schema.org/", "Person");
+	    return select;
+	  }
+	
 	@Bean(name = "selectscintperson")
 	SelectScint getSelectPersonScint() throws SparqlException {
 		SelectScint select = new SelectScint("schema", "http://schema.org/", "Person");
@@ -75,7 +81,8 @@ public class UserProcedureConfig implements GraphConfig {
 		select.getSparqlBean().setFrom("FROM <" + graphUser + ">");
 		return select;
 	}
-//	
+
+	//	
 //	ClassHandler getPersonClassHandler() throws SparqlException {
 //		ClassHandler ch = new ClassHandler("schema", "http://schema.org/", "Person");
 //		ch.setSparqlDAO(sparqlDAO);

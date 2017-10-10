@@ -20,6 +20,8 @@ import org.glycoinfo.rdf.SparqlException;
 import org.glycoinfo.rdf.service.GlycanProcedure;
 import org.glytoucan.admin.Application;
 import org.glytoucan.admin.model.Authentication;
+import org.glytoucan.admin.model.ClassListRequest;
+import org.glytoucan.admin.model.ClassListResponse;
 import org.glytoucan.admin.model.ErrorCode;
 import org.glytoucan.admin.model.User;
 import org.glytoucan.admin.model.Authentication;
@@ -31,6 +33,7 @@ import org.glytoucan.admin.model.UserKeyCheckRequest;
 import org.glytoucan.admin.model.UserKeyCheckResponse;
 import org.glytoucan.admin.model.UserKeyRequest;
 import org.glytoucan.admin.model.UserKeyResponse;
+import org.glytoucan.admin.model.UserRegisterCoreRequest;
 import org.glytoucan.admin.model.UserRegisterRequest;
 import org.glytoucan.admin.model.UserRegisterResponse;
 import org.junit.Assert;
@@ -94,10 +97,14 @@ public class UserEndpointTest {
     marshaller.afterPropertiesSet();
 	}
 	
-  String token="ya29.CjBXA4l-rJxxG7g2PpaTzo3061sa6KIlLzF6y-SX39VRQjKVRGaWcqoZkvxVb48FX6U";
+	String userEmail="aokinobu@gmail.com";
+  String token="ya29.GlytA_61fgAisbjaxC8RnpAZC36PMLJm69yC3adMTqDL_Tof6lwrpyudKiymhO0PlsBNXWvNJ-d9uyGToQ9Gn6srY-C4cdG-AEv3jWzRjcV92IXL9TSJqXQq8um6Zw";
 //  String apiKey = "JDUkMjAxNjA5MDUwOTM5MjMkVWZzaHNyRVFkMVl4Umx0MjJiczVyZFZVNDQ5bUJBVTBoQTdaeGpiUkRpMw==";
-  String apiKey = "JDUkMjAxNjA5MDUwOTM5MjMkVWZzaHNyRVFkMVl4Umx0MjJiczVyZFZVNDQ5bUJBVTBoQTdaeGpiUkRpMw==";
-  String adminEmail = "glytoucan@gmail.com";
+//  String apiKey = "b83f8b8040a584579ab9bf784ef6275fe47b5694b1adeb82e076289bf17c2632";
+  String apiKey = "4da304929bdc1b533a514f5b45e0efc65fdfc7cc20639a3ccab55a1b5fa93d95";
+//  String adminEmail = "glytoucan@gmail.com";
+//  String adminEmail = "815e7cbca52763e5c3fbb5a4dccc176479a50e2367f920843c4c35dca112e33d";
+  String adminEmail = "glycodm@gmail.com";
 
 	@Test
 	@Transactional
@@ -206,7 +213,7 @@ public class UserEndpointTest {
      Assert.assertEquals("0",result.getResponseMessage().getErrorCode());
      Assert.assertNotNull(result.getUser());
      Assert.assertEquals("glytoucan@gmail.com",result.getUser().getEmail());
-     Assert.assertEquals("1",result.getUser().getExternalId());
+     Assert.assertEquals("815e7cbca52763e5c3fbb5a4dccc176479a50e2367f920843c4c35dca112e33d",result.getUser().getExternalId());
      Assert.assertEquals("",result.getUser().getFamilyName());
    }
 
@@ -260,12 +267,65 @@ public class UserEndpointTest {
      Assert.assertTrue(result.isResult());
    }
    
+//   @Test
+   @Transactional
+   public void testUserKeyCheckRequestOAuth() {
+     UserKeyCheckRequest request = new UserKeyCheckRequest();
+     Authentication auth = new Authentication();
+     auth.setId(adminEmail);
+     auth.setApiKey(apiKey);
+     request.setAuthentication(auth);
+     request.setContributorId(userEmail);
+     request.setApiKey(token);
+     marshaller.setPackagesToScan(ClassUtils.getPackageName(UserKeyCheckRequest.class));
+
+     Object wsResult = new WebServiceTemplate(marshaller).marshalSendAndReceive("http://localhost:"
+         + port + "/ws", request);
+//     Object wsResult = new WebServiceTemplate(marshaller).marshalSendAndReceive("http://localhost:8031/ws", request);
+     assertNotNull(wsResult);
+     UserKeyCheckResponse result = (UserKeyCheckResponse)wsResult;
+     assertNotNull(result);
+     logger.debug(result);
+     logger.debug(result.getResponseMessage());
+     logger.debug(result.getResponseMessage().getTime());
+     Assert.assertEquals("0",result.getResponseMessage().getErrorCode());
+     Assert.assertTrue(result.isResult());
+   }
+   
+   @Test   
+   @Transactional
+   public void testUserKeyCheckRequestSKN() {
+     UserKeyCheckRequest request = new UserKeyCheckRequest();
+     Authentication auth = new Authentication();
+     auth.setId(adminEmail);
+     auth.setApiKey(apiKey);
+     request.setAuthentication(auth);
+     request.setContributorId("dedee3c346471769aa57c2d018033a314e5173f052819eda3c7872722b9c0f7b");
+     request.setApiKey("cdacda16afb267613d6eda95ca981b4be93e4870f6e077b98f07582547c2648b");
+//     cdacda16afb267613d6eda95ca981b4be93e4870f6e077b98f07582547c2648b
+//     ca57631ea128dec137bd1c87070280888f0190b3c6eab92cab18b2cc691fd36d
+     marshaller.setPackagesToScan(ClassUtils.getPackageName(UserKeyCheckRequest.class));
+
+     Object wsResult = new WebServiceTemplate(marshaller).marshalSendAndReceive("http://localhost:" + port + "/ws", request);
+//     Object wsResult = new WebServiceTemplate(marshaller).marshalSendAndReceive("http://glytoucan.org:8031/ws", request);
+     
+//     Object wsResult = new WebServiceTemplate(marshaller).marshalSendAndReceive("http://localhost:8031/ws", request);
+     assertNotNull(wsResult);
+     UserKeyCheckResponse result = (UserKeyCheckResponse)wsResult;
+     assertNotNull(result);
+     logger.debug(result);
+     logger.debug(result.getResponseMessage());
+     logger.debug(result.getResponseMessage().getTime());
+     Assert.assertEquals("0",result.getResponseMessage().getErrorCode());
+     Assert.assertTrue(result.isResult());
+   }
+   
    @Test
    @Transactional
    public void testUserKeyCheckRequestContributorDirect() {
      UserKeyCheckRequest request = new UserKeyCheckRequest();
      Authentication auth = new Authentication();
-     auth.setId("1");
+     auth.setId("815e7cbca52763e5c3fbb5a4dccc176479a50e2367f920843c4c35dca112e33d");
      auth.setApiKey(apiKey);
      request.setAuthentication(auth);
      request.setContributorId(adminEmail);
@@ -426,12 +486,18 @@ public class UserEndpointTest {
    
    @Test
    @Transactional
+//<<<<<<< HEAD
    public void testUserKeyCheckRequestSSK() {
      UserKeyCheckRequest request = new UserKeyCheckRequest();
+//=======
+   public void testUserAddJustEmailName() {
+     UserRegisterCoreRequest request = new UserRegisterCoreRequest();
+//>>>>>>> 9df31efc1f3ae0a370102336b73ba61597a2325c
      Authentication auth = new Authentication();
      auth.setId(adminEmail);
      auth.setApiKey(apiKey);
      request.setAuthentication(auth);
+//<<<<<<< HEAD
      request.setContributorId("dedee3c346471769aa57c2d018033a314e5173f052819eda3c7872722b9c0f7b");
      request.setApiKey("cdacda16afb267613d6eda95ca981b4be93e4870f6e077b98f07582547c2648b");
      marshaller.setPackagesToScan(ClassUtils.getPackageName(UserKeyCheckRequest.class));
@@ -441,11 +507,59 @@ public class UserEndpointTest {
 //     Object wsResult = new WebServiceTemplate(marshaller).marshalSendAndReceive("http://localhost:8031/ws", request);
      assertNotNull(wsResult);
      UserKeyCheckResponse result = (UserKeyCheckResponse)wsResult;
+//=======
+     User user = new User();
+     user.setEmail("testglytoucan2@gmail.com");
+     request.setUser(user);
+
+//     UserRegisterResponse result = userEndpoint.register(request);
+    Object wsResult = new WebServiceTemplate(marshaller).marshalSendAndReceive("http://localhost:"
+         + port + "/ws", request);
+     assertNotNull(wsResult);
+     UserRegisterResponse result = (UserRegisterResponse)wsResult;
+//>>>>>>> 9df31efc1f3ae0a370102336b73ba61597a2325c
      assertNotNull(result);
      logger.debug(result);
      logger.debug(result.getResponseMessage());
      logger.debug(result.getResponseMessage().getTime());
      Assert.assertEquals("0",result.getResponseMessage().getErrorCode());
+//<<<<<<< HEAD
      Assert.assertTrue(result.isResult());
+//=======
+     Assert.assertEquals(user.getEmail(), result.getUser().getEmail());
+   }
+   
+   
+   @Test
+   @Transactional
+   public void testClassList() {
+     ClassListRequest request = new ClassListRequest();
+     Authentication auth = new Authentication();
+     auth.setId(adminEmail);
+     auth.setApiKey(apiKey);
+     request.setAuthentication(auth);
+
+     request.setGraph("http://schema.org");
+     request.setClassname("Person");
+     request.setDelimiter(" ");
+     request.setGraph("http://rdf.glytoucan.org/schema/users");
+     request.setPrefix("schema");
+     request.setPrefixUri("http://schema.org/");
+     request.setPredicate("email");
+     request.setOffset("1");
+     request.setLimit("10");
+
+//     UserRegisterResponse result = userEndpoint.register(request);
+    Object wsResult = new WebServiceTemplate(marshaller).marshalSendAndReceive("http://localhost:"
+         + port + "/ws", request);
+     assertNotNull(wsResult);
+     ClassListResponse result = (ClassListResponse)wsResult;
+     assertNotNull(result);
+     logger.debug(result);
+     logger.debug(result.getResponseMessage());
+     logger.debug(result.getResponseMessage().getTime());
+     Assert.assertEquals("0",result.getResponseMessage().getErrorCode());
+     Assert.assertEquals("glytoucan@gmail.com sparqlite@gmail.com aokinobu@gmail.com", result.getResults());
+//>>>>>>> 9df31efc1f3ae0a370102336b73ba61597a2325c
    }
 }

@@ -10,6 +10,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.glycoinfo.rdf.SelectSparql;
+import org.glycoinfo.rdf.SelectSparqlBean;
+import org.glycoinfo.rdf.SparqlBean;
 import org.glycoinfo.rdf.SparqlException;
 import org.glycoinfo.rdf.dao.SparqlDAO;
 import org.glycoinfo.rdf.dao.SparqlEntity;
@@ -25,6 +27,7 @@ import org.glycoinfo.rdf.service.impl.MailService;
 import org.glycoinfo.rdf.utils.NumberGenerator;
 import org.glytoucan.admin.exception.UserException;
 import org.glytoucan.admin.model.User;
+import org.glytoucan.admin.model.UserCoreRequest;
 import org.glytoucan.admin.model.UserDetailsRequest;
 import org.glytoucan.admin.model.UserDetailsResponse;
 import org.glytoucan.admin.model.UserKeyRequest;
@@ -42,7 +45,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UserProcedureRdf implements UserProcedure {
 
-  Log logger = LogFactory.getLog(UserProcedureRdf.class);
+
+Log logger = LogFactory.getLog(UserProcedureRdf.class);
 
   String[] requiredFields = { "email", "givenName", "familyName", "verifiedEmail", UserProcedure.CONTRIBUTOR_ID };
 
@@ -52,6 +56,10 @@ public class UserProcedureRdf implements UserProcedure {
   @Autowired
   @Qualifier(value = "selectscintperson")
   SelectScint selectScintPerson;
+  
+  @Autowired
+  @Qualifier(value = "selectclasslist")
+  SelectScint selectClassList;
 
   @Autowired
   @Qualifier(value = "insertscintperson")
@@ -179,7 +187,7 @@ public class UserProcedureRdf implements UserProcedure {
     // find external contributor id
     String contributorId = userSparqlEntity.getValue(UserProcedure.CONTRIBUTOR_ID);
 
-    if (StringUtils.isBlank(nameMap(sparqlentityPerson)) && !StringUtils.equals(contributorId, "1"))
+    if (StringUtils.isBlank(nameMap(sparqlentityPerson)) && !StringUtils.equals(contributorId, "815e7cbca52763e5c3fbb5a4dccc176479a50e2367f920843c4c35dca112e33d"))
       throw new UserException("given name cannot be blank.  Please fix account information or login with google+.");
 
 
@@ -250,6 +258,51 @@ public class UserProcedureRdf implements UserProcedure {
   }
 
   @Transactional
+  public void addCore(SparqlEntity userSparqlEntity) throws UserException {
+    Set<String> columns = userSparqlEntity.getColumns();
+    if (!columns.contains(EMAIL)) {
+      throw new UserException(UserException.EMAIL_NOT_SUPPLIED);
+    }
+
+    if (StringUtils.isBlank(userSparqlEntity.getValue(EMAIL)))
+        throw new UserException(UserException.EMAIL_CANNOT_BE_BLANK);
+
+    String id = determinePrimaryKey(userSparqlEntity.getValue(EMAIL));
+
+    final SparqlEntity sparqlentityPerson = new SparqlEntity(id);
+    sparqlentityPerson.setValue(EMAIL, userSparqlEntity.getValue(EMAIL));
+
+    try {
+      insertScintPerson.update(sparqlentityPerson);
+
+      sparqlDAO.insert(insertScintPerson.getSparqlBean());
+    } catch (SparqlException e) {
+      throw new UserException(e);
+    }
+
+    SparqlEntity sparqlentityRegisterAction = new SparqlEntity(id);
+
+    SparqlEntity sparqlentityDateTime = new SparqlEntity(new Date());
+    try {
+      selectScintDateTime.update(sparqlentityDateTime);
+
+      sparqlentityRegisterAction.setValue("startTime", selectScintDateTime);
+
+      SparqlEntity sparqlEntityPerson = new SparqlEntity(id);
+      selectScintPerson.update(sparqlEntityPerson);
+
+      sparqlentityRegisterAction.setValue("participant", selectScintPerson);
+
+      insertScintRegisterAction.update(sparqlentityRegisterAction);
+
+      sparqlDAO.insert(insertScintRegisterAction.getSparqlBean());
+
+    } catch (SparqlException e) {
+      throw new UserException(e);
+    }
+  }
+  
+  @Transactional
   public String generateHash(String id) throws UserException {
     // SparqlEntity userSE = getUser(email);
     // String userid = userSE.getValue(ID);
@@ -318,7 +371,7 @@ public class UserProcedureRdf implements UserProcedure {
 
   private String nameMap(SparqlEntity sparqlEntity) {
     // the name map is the mapping of gmail address to contributor ID.
-    return sparqlEntity.getValue(org.glytoucan.admin.service.UserProcedureRdf.GIVEN_NAME);
+    return sparqlEntity.getValue(org.glytoucan.admin.service.UserProcedureRdf.GIVEN_NAME) + " " + sparqlEntity.getValue(FAMILY_NAME);
   }
 
   
@@ -418,14 +471,51 @@ public class UserProcedureRdf implements UserProcedure {
   }
 
   @Transactional
-  public List<SparqlEntity> getAll() throws UserException {
+  public List<SparqlEntity> getAll(String offset, String limit) throws UserException {
     try {
-      return sparqlDAO.query(selectScintPerson.getSparqlBean());
+    	SelectSparql select = selectScintPerson.getSparqlBean();
+    	select.setOffset(offset);
+    	select.setLimit(limit);
+      return sparqlDAO.query(select);
     } catch (SparqlException e) {
       throw new UserException(e);
     }
   }
+  
 
+  @Transactional
+  public String getAllClass(String graph, String prefix, String prefixUri, String classname, String predicate, String limit,
+      String offset, String delimiter) throws UserException {
+    SelectScint select = selectClassList;
+    selectClassList.setPrefix(prefix);
+    selectClassList.setPrefixIri(prefixUri);
+    selectClassList.setClassName(classname);
+    try {
+      select.update();
+      SelectSparql sparql = select.getSparqlBean();
+      
+      sparql.setOffset(offset);
+      sparql.setLimit(limit);
+      
+      final SparqlEntity sparqlentity = new SparqlEntity();
+      sparqlentity.setValue(predicate, null);
+      sparql.setSparqlEntity(sparqlentity);
+
+      
+      List<SparqlEntity> results = sparqlDAO.query(sparql);
+
+      StringBuilder sb = new StringBuilder();
+      for (Iterator iterator = results.iterator(); iterator.hasNext();) {
+        SparqlEntity sparqlEntity = (SparqlEntity) iterator.next();
+        sb.append(sparqlEntity.getValue(predicate));
+        if (iterator.hasNext())
+          sb.append(delimiter);
+      }
+      return sb.toString();
+    } catch (SparqlException e) {
+      throw new UserException(e);
+    }
+  }
 
   @Transactional
   public List<SparqlEntity> getByContributorId(String username) throws UserException {
@@ -580,7 +670,35 @@ public class UserProcedureRdf implements UserProcedure {
     return res;
   }
   
+  @Override
+  @Transactional
+  public UserDetailsResponse getCore(UserCoreRequest req) throws UserException {
+    String email = req.getEmail();
+    String primaryKey = determinePrimaryKey(email);
+    SparqlEntity sparqlEntityPerson = new SparqlEntity(primaryKey);
+    sparqlEntityPerson.setValue(EMAIL, null);
+    UserDetailsResponse res = new UserDetailsResponse();
+    try {
+      selectScintPerson.update(sparqlEntityPerson);
+
+      List<SparqlEntity> sRes = sparqlDAO.query(selectScintPerson.getSparqlBean());
+      User user = new User();
+      if (sRes.iterator().hasNext()) {
+        SparqlEntity sResultsSE = sRes.iterator().next();
+
+        user.setEmail(sResultsSE.getValue(EMAIL));
+      }
+      
+      res.setUser(user);
+
+    } catch (SparqlException e) {
+      throw new UserException(e);
+    }
+    
+    return res;
+  }
+  
   private String determinePrimaryKey(String email) {
-    return NumberGenerator.generateHash(email, new Date(0));
+    return NumberGenerator.generateSHA256Hash(email);
   }
 }
