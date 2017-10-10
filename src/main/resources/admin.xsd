@@ -135,5 +135,8 @@
 			<xs:enumeration value="SERVICE_EXCEPTION" />
 		</xs:restriction>
 	</xs:simpleType>
+	
+	// class list request
+	// rdf results xml
 
 </xs:schema>
