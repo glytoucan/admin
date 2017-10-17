@@ -1,0 +1,29 @@
+version: '2'
+services:
+  admin:
+#  docker run -e PROJECT_FOLDER=target/ -e PROJECT_FILE=admin -e VERSION_NUMBER=-1.2.11-TOCO-SNAPSHOT -e EXTENSION=.jar -v /home/aoki/workspace/docker-compose-glytoucan:/workspace --workdir=/workspace aokinobu/java-release  /run.sh
+    image: maven:3.3.9-jdk-8-onbuild-alpine
+    ports:
+      - 8031:80
+    volumes:
+      - ${HOME}/glytoucan/maven:/root/.m2
+      - ${WORKSPACE_PARENT}/${WORKSPACE}/${PROJECT}:/workspace
+      - /etc/localtime:/etc/localtime
+    working_dir: /workspace/admin
+    command: mvn -U -DskipTests=true spring-boot:run ${SPRING_PROFILE}
+    environment:
+     - SERVER_PORT=80
+     - MAIL_ADDRESS_FROM
+     - MAIL_ADDRESS_ADMIN
+     - MAIL_BODY_NEWREGISTRATION
+     - MAIL_BODY_NOTIFYREGISTRATION
+     - MAIL_SUBJECT_NEWREGISTRATION
+     - MAIL_SUBJECT_NOTIFYREGISTRATION
+     - SPRING_MAIL_USERNAME
+     - SPRING_MAIL_PASSWORD
+     - SPRING_TRIPLESTORE_URL=${USER_TRIPLESTORE_URL}
+     - SPRING_TRIPLESTORE_PASSWORD=${USER_TRIPLESTORE_PASSWORD}
+     - MAVEN_OPTS=-da:org.openrdf...
+     - GOOGLE_OAUTH2_CLIENTID
+     - GOOGLE_OAUTH2_CLIENTSECRET
+    restart: always
