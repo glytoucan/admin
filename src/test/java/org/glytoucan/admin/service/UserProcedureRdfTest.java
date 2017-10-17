@@ -312,7 +312,6 @@ public class UserProcedureRdfTest {
           + "<http://schema.org/Person#" + hash + "> <http://schema.org/alternateName> \"" + hash + "\" . \n"
           + "}\n"
           + "}"));
-        
     }
     
     ssb = new SelectSparqlBean(" prefix schema: <http://schema.org/> SELECT distinct count(?o) ?email  WHERE {\n" + 
