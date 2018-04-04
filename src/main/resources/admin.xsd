@@ -1,5 +1,6 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-	xmlns:admin="http://model.admin.glytoucan.org/" targetNamespace="http://model.admin.glytoucan.org/"
+	xmlns:admin="http://model.admin.glytoucan.org/"
+	targetNamespace="http://model.admin.glytoucan.org/"
 	elementFormDefault="qualified">
 
 	<xs:complexType name="responseMessage">
@@ -17,7 +18,7 @@
 			<xs:element name="apiKey" type="xs:string" />
 		</xs:sequence>
 	</xs:complexType>
-	
+
 	<xs:complexType name="user">
 		<xs:sequence>
 			<xs:element name="primaryId" type="xs:string" />
@@ -33,7 +34,8 @@
 	<xs:element name="userKeyRequest">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element name="authentication" type="admin:authentication" />
+				<xs:element name="authentication"
+					type="admin:authentication" />
 				<xs:element name="primaryId" type="xs:string" />
 			</xs:sequence>
 		</xs:complexType>
@@ -44,7 +46,8 @@
 			<xs:sequence>
 				<xs:element name="primaryId" type="xs:string" />
 				<xs:element name="key" type="xs:string" />
-				<xs:element name="responseMessage" type="admin:responseMessage" />
+				<xs:element name="responseMessage"
+					type="admin:responseMessage" />
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -52,7 +55,8 @@
 	<xs:element name="userDetailsRequest">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element name="authentication" type="admin:authentication" />
+				<xs:element name="authentication"
+					type="admin:authentication" />
 				<xs:element name="primaryId" type="xs:string" />
 			</xs:sequence>
 		</xs:complexType>
@@ -61,7 +65,8 @@
 	<xs:element name="userCoreRequest">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element name="authentication" type="admin:authentication" />
+				<xs:element name="authentication"
+					type="admin:authentication" />
 				<xs:element name="email" type="xs:string" />
 			</xs:sequence>
 		</xs:complexType>
@@ -71,7 +76,8 @@
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element name="user" type="admin:user" />
-				<xs:element name="responseMessage" type="admin:responseMessage" />
+				<xs:element name="responseMessage"
+					type="admin:responseMessage" />
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -79,7 +85,8 @@
 	<xs:element name="userKeyCheckRequest">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element name="authentication" type="admin:authentication" />
+				<xs:element name="authentication"
+					type="admin:authentication" />
 				<xs:element name="contributorId" type="xs:string" />
 				<xs:element name="apiKey" type="xs:string" />
 			</xs:sequence>
@@ -90,7 +97,8 @@
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element name="result" type="xs:boolean" />
-				<xs:element name="responseMessage" type="admin:responseMessage" />
+				<xs:element name="responseMessage"
+					type="admin:responseMessage" />
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -98,7 +106,8 @@
 	<xs:element name="userRegisterRequest">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element name="authentication" type="admin:authentication" />
+				<xs:element name="authentication"
+					type="admin:authentication" />
 				<xs:element name="user" type="admin:user" />
 			</xs:sequence>
 		</xs:complexType>
@@ -107,7 +116,8 @@
 	<xs:element name="userRegisterCoreRequest">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element name="authentication" type="admin:authentication" />
+				<xs:element name="authentication"
+					type="admin:authentication" />
 				<xs:element name="user" type="admin:user" />
 			</xs:sequence>
 		</xs:complexType>
@@ -117,15 +127,17 @@
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element name="user" type="admin:user" />
-				<xs:element name="responseMessage" type="admin:responseMessage" />
+				<xs:element name="responseMessage"
+					type="admin:responseMessage" />
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
-	
+
 	<xs:element name="userGenerateKeyRequest">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element name="authentication" type="admin:authentication" />
+				<xs:element name="authentication"
+					type="admin:authentication" />
 				<xs:element name="primaryId" type="xs:string" />
 			</xs:sequence>
 		</xs:complexType>
@@ -136,7 +148,8 @@
 			<xs:sequence>
 				<xs:element name="primaryId" type="xs:string" />
 				<xs:element name="key" type="xs:string" />
-				<xs:element name="responseMessage" type="admin:responseMessage" />
+				<xs:element name="responseMessage"
+					type="admin:responseMessage" />
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -144,7 +157,8 @@
 	<xs:element name="classListRequest">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element name="authentication" type="admin:authentication" />
+				<xs:element name="authentication"
+					type="admin:authentication" />
 
 				<xs:element name="graph" type="xs:string" />
 				<xs:element name="prefix" type="xs:string" />
@@ -162,11 +176,12 @@
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element name="results" type="xs:string" />
-				<xs:element name="responseMessage" type="admin:responseMessage" />
+				<xs:element name="responseMessage"
+					type="admin:responseMessage" />
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
-	
+
 	<xs:simpleType name="errorCode">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="OK" />
@@ -179,8 +194,5 @@
 			<xs:enumeration value="SERVICE_EXCEPTION" />
 		</xs:restriction>
 	</xs:simpleType>
-	
-	// class list request
-	// rdf results xml
-
 </xs:schema>
+
